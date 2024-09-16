@@ -42,7 +42,7 @@ Includes
 #include "STDTypes.h"
 
 /***********************************************************************************************************************
-Type Definitions
+Macro Definitions
 ***********************************************************************************************************************/
 
 
@@ -113,6 +113,10 @@ Type Definitions
 #define DArray_Shrink_To_Fit( arr ) Arr_ShrinkToFit( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity )
 
 #define DArray_Erase( arr, index ) Arr_Erase( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, index )
+
+/***********************************************************************************************************************
+Static functions implementation
+***********************************************************************************************************************/
 
 inline static void Arr_Erase( void** buf, size_t* length, const size_t elementSize, size_t* capacity, size_t index )
 {
