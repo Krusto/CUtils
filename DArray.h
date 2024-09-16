@@ -1,5 +1,5 @@
-#ifndef CARRAY_HEADER
-#define CARRAY_HEADER
+#ifndef DARRAY_HEADER
+#define DARRAY_HEADER
 /**
  * @file
  * @author Krusto Stoyanov ( k.stoianov2@gmail.com )
@@ -69,6 +69,9 @@ Type Definitions
 #define DArray_Size( arr ) arr.length* arr.elementSize
 #define DArray_Capacity( arr ) arr.capacity
 
+#define DArray_Reserve( arr, capacity )                                                                                \
+    Arr_Reserve( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, capacity )
+
 #define DArray_Resize( arr, newLength )                                                                                \
     Arr_Resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, newLength )
 
@@ -76,11 +79,30 @@ Type Definitions
     DArray_Resize( arr, arr.length + 1 );                                                                              \
     arr.data[ arr.length - 1 ] = value
 
+#define DArray_Insert( arr, index, value )                                                                             \
+    DArray_Resize( arr, arr.length + 1 );                                                                              \
+    if ( index < arr.length )                                                                                          \
+    {                                                                                                                  \
+        void* resultPtr = NULL;                                                                                        \
+        if ( NULL != arr.data )                                                                                        \
+        {                                                                                                              \
+            size_t len = ( arr.length ) - ( index + 1 );                                                               \
+            void* next = &arr.data[ index + 1 ];                                                                       \
+            void* current = &arr.data[ index ];                                                                        \
+            resultPtr = memcpy( next, current, len * arr.elementSize );                                                \
+            if ( NULL != resultPtr ) { arr.data[ index ] = value; }                                                    \
+        }                                                                                                              \
+    }
+
 #define DArray_Pop( arr )                                                                                              \
     arr.data[ arr.length - 1 ];                                                                                        \
     Arr_Resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, arr.length - 1 )
 
 #define DArray_Get( arr, index ) arr.data[ index ]
+#define DArray_Front( arr ) arr.data[ 0 ]
+#define DArray_Back( arr ) arr.data[ arr.length - 1 ]
+
+#define DArray_Empty( arr ) ( 0 == arr.length )
 
 #define DArray_Destroy( arr )                                                                                          \
     free( arr.data );                                                                                                  \
@@ -88,7 +110,36 @@ Type Definitions
     arr.capacity = 0;                                                                                                  \
     arr.data = NULL
 
-#define DArray_Shrink_To_Fit( arr ) Arr_ShrinkToFit( (void**)&arr.data, &arr.length, arr.elementSize, &arr.capacity )
+#define DArray_Shrink_To_Fit( arr ) Arr_ShrinkToFit( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity )
+
+#define DArray_Erase( arr, index ) Arr_Erase( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, index )
+
+inline static void Arr_Erase( void** buf, size_t* length, const size_t elementSize, size_t* capacity, size_t index )
+{
+    if ( index < *length )
+    {
+        void* resultPtr = NULL;
+        if ( NULL != *buf )
+        {
+            void* dest = &( *buf )[ index ];
+            void* src = &( *buf )[ index + elementSize ];
+            resultPtr = memcpy( dest, src, ( *length - index ) );
+        }
+        if ( NULL != resultPtr ) { *length -= 1; }
+    }
+}
+
+inline static void Arr_Insert( void** buf, size_t* length, const size_t elementSize, size_t* capacity, uint32_t index,
+                               void* element )
+{
+    void* src = &( *buf )[ index ];
+    void* dest = &( *buf )[ index + elementSize ];
+    void* resultPtr = NULL;
+
+    resultPtr = memcpy( dest, src, ( *length - index - 1 ) );
+
+    if ( NULL != resultPtr ) { resultPtr = memcpy( src, element, elementSize ); }
+}
 
 inline static void Arr_ShrinkToFit( void** buf, size_t* length, const size_t elementSize, size_t* capacity )
 {
@@ -100,6 +151,24 @@ inline static void Arr_ShrinkToFit( void** buf, size_t* length, const size_t ele
         {
             *capacity = *length;
             *buf = resultPtr;
+        }
+    }
+}
+
+inline static void Arr_Reserve( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
+                                size_t newCapacity )
+{
+    if ( newCapacity > *capacity )
+    {
+        void* resultPtr;
+
+        if ( NULL == *buf ) { resultPtr = malloc( newCapacity * elementSize ); }
+        else { resultPtr = realloc( *buf, newCapacity * elementSize ); }
+
+        if ( NULL != resultPtr )
+        {
+            *buf = resultPtr;
+            *capacity = newCapacity;
         }
     }
 }
@@ -128,4 +197,4 @@ inline static void Arr_Resize( void** buf, size_t* length, const size_t elementS
     }
     else { *length = newLength; }
 }
-#endif// CARRAY_HEADER
+#endif// DARRAY_HEADER
