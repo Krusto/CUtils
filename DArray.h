@@ -39,12 +39,12 @@
 /***********************************************************************************************************************
 Includes
 ***********************************************************************************************************************/
+#include "CMemory.h"
 #include "STDTypes.h"
 
 /***********************************************************************************************************************
 Macro Definitions
 ***********************************************************************************************************************/
-
 
 #define DArray_t( t, name )                                                                                            \
     typedef struct {                                                                                                   \
@@ -70,10 +70,10 @@ Macro Definitions
 #define DArray_Capacity( arr ) arr.capacity
 
 #define DArray_Reserve( arr, capacity )                                                                                \
-    Arr_Reserve( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, capacity )
+    arr_reserve( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, capacity )
 
 #define DArray_Resize( arr, newLength )                                                                                \
-    Arr_Resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, newLength )
+    arr_resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, newLength )
 
 #define DArray_Push( arr, value )                                                                                      \
     DArray_Resize( arr, arr.length + 1 );                                                                              \
@@ -89,14 +89,14 @@ Macro Definitions
             size_t len = ( arr.length ) - ( index + 1 );                                                               \
             void* next = &arr.data[ index + 1 ];                                                                       \
             void* current = &arr.data[ index ];                                                                        \
-            resultPtr = memcpy( next, current, len * arr.elementSize );                                                \
+            resultPtr = CMEMCPY( next, current, len * arr.elementSize );                                               \
             if ( NULL != resultPtr ) { arr.data[ index ] = value; }                                                    \
         }                                                                                                              \
     }
 
 #define DArray_Pop( arr )                                                                                              \
     arr.data[ arr.length - 1 ];                                                                                        \
-    Arr_Resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, arr.length - 1 )
+    arr_resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, arr.length - 1 )
 
 #define DArray_Get( arr, index ) arr.data[ index ]
 #define DArray_Front( arr ) arr.data[ 0 ]
@@ -105,52 +105,52 @@ Macro Definitions
 #define DArray_Empty( arr ) ( 0 == arr.length )
 
 #define DArray_Destroy( arr )                                                                                          \
-    free( arr.data );                                                                                                  \
+    CFREE( arr.data, arr.capacity );                                                                                   \
     arr.length = 0;                                                                                                    \
     arr.capacity = 0;                                                                                                  \
     arr.data = NULL
 
-#define DArray_Shrink_To_Fit( arr ) Arr_ShrinkToFit( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity )
+#define DArray_Shrink_To_Fit( arr ) arr_shrinkToFit( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity )
 
-#define DArray_Erase( arr, index ) Arr_Erase( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, index )
+#define DArray_Erase( arr, index ) arr_erase( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, index )
 
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/
 
-inline static void Arr_Erase( void** buf, size_t* length, const size_t elementSize, size_t* capacity, size_t index )
+inline static void arr_erase( void** buf, size_t* length, const size_t elementSize, size_t* capacity, size_t index )
 {
     if ( index < *length )
     {
         void* resultPtr = NULL;
         if ( NULL != *buf )
         {
-            void* dest = &( *buf )[ index ];
-            void* src = &( *buf )[ index + elementSize ];
-            resultPtr = memcpy( dest, src, ( *length - index ) );
+            void* dest = &( ( *buf )[ index ] );
+            void* src = &( ( *buf )[ index + elementSize ] );
+            resultPtr = CMEMCPY( dest, src, ( *length - index ) );
         }
         if ( NULL != resultPtr ) { *length -= 1; }
     }
 }
 
-inline static void Arr_Insert( void** buf, size_t* length, const size_t elementSize, size_t* capacity, uint32_t index,
+inline static void arr_insert( void** buf, size_t* length, const size_t elementSize, size_t* capacity, uint32_t index,
                                void* element )
 {
-    void* src = &( *buf )[ index ];
-    void* dest = &( *buf )[ index + elementSize ];
+    void* src = &( ( *buf )[ index ] );
+    void* dest = &( ( *buf )[ index + elementSize ] );
     void* resultPtr = NULL;
 
-    resultPtr = memcpy( dest, src, ( *length - index - 1 ) );
+    resultPtr = CMEMCPY( dest, src, ( *length - index - 1 ) );
 
-    if ( NULL != resultPtr ) { resultPtr = memcpy( src, element, elementSize ); }
+    if ( NULL != resultPtr ) { resultPtr = CMEMCPY( src, element, elementSize ); }
 }
 
-inline static void Arr_ShrinkToFit( void** buf, size_t* length, const size_t elementSize, size_t* capacity )
+inline static void arr_shrinkToFit( void** buf, size_t* length, const size_t elementSize, size_t* capacity )
 {
     if ( *capacity > *length )
     {
         void* resultPtr = NULL;
-        if ( NULL != *buf ) { resultPtr = realloc( *buf, *length * elementSize ); }
+        if ( NULL != *buf ) { resultPtr = CREALLOC( *buf, *length * elementSize ); }
         if ( NULL != resultPtr )
         {
             *capacity = *length;
@@ -159,15 +159,15 @@ inline static void Arr_ShrinkToFit( void** buf, size_t* length, const size_t ele
     }
 }
 
-inline static void Arr_Reserve( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
+inline static void arr_reserve( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
                                 size_t newCapacity )
 {
     if ( newCapacity > *capacity )
     {
         void* resultPtr;
 
-        if ( NULL == *buf ) { resultPtr = malloc( newCapacity * elementSize ); }
-        else { resultPtr = realloc( *buf, newCapacity * elementSize ); }
+        if ( NULL == *buf ) { resultPtr = CMALLOC( newCapacity * elementSize ); }
+        else { resultPtr = CREALLOC( *buf, newCapacity * elementSize ); }
 
         if ( NULL != resultPtr )
         {
@@ -177,7 +177,7 @@ inline static void Arr_Reserve( void** buf, size_t* length, const size_t element
     }
 }
 
-inline static void Arr_Resize( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
+inline static void arr_resize( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
                                size_t newLength )
 {
     if ( newLength > *length )
@@ -187,8 +187,8 @@ inline static void Arr_Resize( void** buf, size_t* length, const size_t elementS
             void* resultPtr;
             size_t newCapacity = newLength * 2;
 
-            if ( NULL == *buf ) { resultPtr = malloc( newCapacity * elementSize ); }
-            else { resultPtr = realloc( *buf, newCapacity * elementSize ); }
+            if ( NULL == *buf ) { resultPtr = CMALLOC( newCapacity * elementSize ); }
+            else { resultPtr = CREALLOC( *buf, newCapacity * elementSize ); }
 
             if ( NULL != resultPtr )
             {
