@@ -45,18 +45,36 @@ Includes
 /***********************************************************************************************************************
 Macro Definitions
 ***********************************************************************************************************************/
-#ifndef NO_STD_LOG
-#define LOG( ... ) printf( __VA_ARGS__ )
-#define LOG_ERROR( ... )                                                                                               \
-    LOG( "Error: " );                                                                                                  \
-    printf( __VA_ARGS__ )
-#define LOG_INFO( ... )                                                                                                \
-    LOG( "Info: " );                                                                                                   \
-    printf( __VA_ARGS__ )
-#else
-#define LOG( ... )
-#endif
 
+// clang-format off
+#ifndef NO_STD_LOG
+    #define LOG( ... ) printf( __VA_ARGS__ )
+    #define LOG_ERROR( ... )                                                                                               \
+        LOG( "Error: " );                                                                                                  \
+        printf( __VA_ARGS__ )
+    
+    #ifdef CUTILS_VERBOSE
+        #define LOG_INFO( ... )                                                                                                \
+            LOG( "Info: " );                                                                                                   \
+            printf( __VA_ARGS__ )
+    #else   
+        #define LOG_INFO( ... )
+    #endif
+    #ifdef NDEBUG
+        #define LOG_DEBUG(...)
+    #else
+        #define LOG_DEBUG(...)\
+            LOG("Debug: ");\
+            printf(__VA_ARGS__)
+    #endif
+
+#else
+    #define LOG( ... )
+    #define LOG_INFO( ... )
+    #define LOG_DEBUG(...)
+
+#endif
+// clang-format on
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/

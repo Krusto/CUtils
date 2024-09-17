@@ -5,8 +5,8 @@
 
 int main( void )
 {
-    const char* text = "Example text";
-    file_write_binary( "example.bin", text, 12 );
-    
+    const int8_t data[] = { 0x41, 0x2, 0x3, 0x4, 0x5, 0x5 };
+    file_write_binary( "example.bin", data, 6 );
+
     return 0;
 }
