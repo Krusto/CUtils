@@ -71,12 +71,11 @@ Macro Definitions
 
 #define DArray_Push( arr, value )                                                                                      \
     DArray_Resize( arr, arr->length + 1 );                                                                             \
-    DArray_MEMSET( arr, arr->length - 1, value )
+    DArray_Memset( arr, arr->length - 1, value )
 
 #define DArray_PushStr( arr, ptr )                                                                                     \
     DArray_Resize( ( _DArrayType* ) arr, DArray_Length( ( _DArrayType* ) arr ) + 1 );                                  \
     ( ( int8_t** ) DArray_Data( arr ) )[ ( DArray_Length( arr ) - 1 ) ] = ptr;
-
 
 #define DArray_Insert( arr, index, value )                                                                             \
     {                                                                                                                  \
@@ -90,7 +89,7 @@ Macro Definitions
                 void* next = ( void* ) &arr->data[ index * arr->elementSize + arr->elementSize ];                      \
                 void* current = &arr->data[ index * arr->elementSize ];                                                \
                 resultPtr = CMEMCPY( next, current, len * arr->elementSize );                                          \
-                if ( NULL != resultPtr ) { DArray_MEMSET( arr, index, value ); }                                       \
+                if ( NULL != resultPtr ) { DArray_Memset( arr, index, value ); }                                       \
             }                                                                                                          \
         }                                                                                                              \
     }
@@ -110,14 +109,13 @@ Macro Definitions
 
 #define DStrArray_Destroy( arr ) str_arr_destroy( ( _DArrayType* ) arr )
 
-#define DArray_Shrink_To_Fit( arr ) arr_shrinkToFit( arr )
+#define DArray_Shrink_To_Fit( arr ) arr_shring_to_fit( arr )
 
 #define DArray_Erase( arr, index ) arr_erase( arr, index )
 
 #define DARRAY_HEADER_SIZE sizeof( size_t ) * 3
 
-
-#define DArray_MEMSET( arr, index, value )                                                                             \
+#define DArray_Memset( arr, index, value )                                                                             \
     for ( size_t currElementIndex = 0; currElementIndex < arr->elementSize; currElementIndex++ )                       \
     {                                                                                                                  \
         CMEMSET( &arr->data[ ( index ) * arr->elementSize + currElementIndex ],                                        \
@@ -224,7 +222,7 @@ inline static void arr_insert( _DArrayType* buf, uint32_t index, void* element )
     if ( NULL != resultPtr ) { resultPtr = CMEMCPY( src, element, buf->elementSize ); }
 }
 
-inline static void arr_shrinkToFit( _DArrayType* buf )
+inline static void arr_shring_to_fit( _DArrayType* buf )
 {
     if ( buf->capacity > buf->length )
     {

@@ -34,5 +34,6 @@ int main( void )
     FolderContentsType f;
     list_directory_contents( "C:\\Users\\Krusto", &f );
 
+    free_folder_contents_struct( &f );
     return 0;
 }
