@@ -42,6 +42,7 @@ Includes
 #include "CLog.h"
 #include "CMemory.h"
 #include "DArray.h"
+#include "DString.h"
 #include "STDTypes.h"
 
 #ifndef NO_STD_MALLOC
@@ -51,11 +52,14 @@ Includes
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <dirent.h>
 #endif
 
 /***********************************************************************************************************************
 Macro Definitions
 ***********************************************************************************************************************/
+#define MAX_PATH_SIZE 2048u
 
 /***********************************************************************************************************************
 Type Definitions
@@ -76,6 +80,7 @@ typedef enum
 typedef struct {
     const int8_t* path;
     DArray_t( int8_t*, files );
+    DArray_t( int8_t*, directories );
 } FolderContentsType;
 
 /***********************************************************************************************************************
@@ -89,7 +94,7 @@ Static functions implementation
  * @param buffer Read data from file
  * @return File Operation Result
  */
-FileOpResultType file_read_binary( const int8_t* filename, size_t* filesize, uint8_t** buffer )
+inline static FileOpResultType file_read_binary( const int8_t* filename, size_t* filesize, uint8_t** buffer )
 {
     FileOpResultType result = FILE_READ_SUCCESFULLY;
     // start processing
@@ -134,7 +139,7 @@ FileOpResultType file_read_binary( const int8_t* filename, size_t* filesize, uin
  * @param buffer Read data from the file
  * @return File Operation Result
  */
-FileOpResultType file_read_string( const int8_t* filename, size_t* filesize, uint8_t** buffer )
+inline static FileOpResultType file_read_string( const int8_t* filename, size_t* filesize, uint8_t** buffer )
 {
     FileOpResultType result = FILE_READ_SUCCESFULLY;
 
@@ -182,7 +187,7 @@ FileOpResultType file_read_string( const int8_t* filename, size_t* filesize, uin
  * @param buffer String to write
  * @return File Operation Result
  */
-FileOpResultType file_write_string( const int8_t* filename, const int8_t* buffer )
+inline static FileOpResultType file_write_string( const int8_t* filename, const int8_t* buffer )
 {
     FileOpResultType result = FILE_WROTE_SUCCESFULLY;
 
@@ -222,7 +227,7 @@ FileOpResultType file_write_string( const int8_t* filename, const int8_t* buffer
  * @param filesize Size of the buffer to write
  * @return File Operation Result
  */
-FileOpResultType file_write_binary( const int8_t* filename, const uint8_t* buffer, size_t filesize )
+inline static FileOpResultType file_write_binary( const int8_t* filename, const uint8_t* buffer, size_t filesize )
 {
     FileOpResultType result = FILE_WROTE_SUCCESFULLY;
 
@@ -255,15 +260,34 @@ FileOpResultType file_write_binary( const int8_t* filename, const uint8_t* buffe
     return result;
 }
 
-#ifdef _WIN32
-BOOL list_directory_contents( const int8_t* dir )
+/**
+ * @brief frees all dynamic strings from folder content struct
+ * @param contents 
+ */
+inline static void free_folder_contents_struct( FolderContentsType* contents )
 {
+    if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
+    if ( NULL != contents->directories ) { DStrArray_Destroy( contents->directories ); }
+}
+
+#ifdef _WIN32
+/**
+ * @brief lists directory contents
+ * @param dir path to directory
+ * @param contents output list
+ * @return TRUE if success otherwise FALSE
+ */
+inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
+{
+    contents->files = DArray_Init( int8_t* );
+    contents->directories = DArray_Init( int8_t* );
+
     WIN32_FIND_DATA fdFile;
     HANDLE hFind = NULL;
 
-    int8_t sPath[ 2048 ];
+    int8_t sPath[ MAX_PATH_SIZE ];
 
-    //Specify a file mask. *.* = We want everything!
+    //Specify a file mask. *.*
     sprintf( sPath, "%s\\*.*", dir );
 
     if ( ( hFind = FindFirstFile( sPath, &fdFile ) ) == INVALID_HANDLE_VALUE )
@@ -273,17 +297,68 @@ BOOL list_directory_contents( const int8_t* dir )
     }
 
     do {
-        if ( strcmp( fdFile.cFileName, "." ) != 0 && strcmp( fdFile.cFileName, ".." ) != 0 )
+
+        BOOL skip = FALSE;
+        if ( strcmp( fdFile.cFileName, "." ) != 0 && strcmp( fdFile.cFileName, ".." ) != 0 ) { skip = TRUE; }
+
+        if ( ( FALSE == skip ) && ( fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
         {
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
-
-            if ( fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) { LOG_INFO( "Directory: %s\n", sPath ); }
-            else { LOG_INFO( "File: %s\n", sPath ); }
+            DArray_PushStr( contents->directories, DString_Create( sPath, DString_Length( sPath ) ) );
         }
+        else if ( ( FALSE == skip ) )
+        {
+            sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
+            DArray_PushStr( contents->files, DString_Create( sPath, DString_Length( sPath ) ) );
+        }
+
     } while ( FindNextFile( hFind, &fdFile ) );//Find the next file.
 
-    FindClose( hFind );//Always, Always, clean things up!
+    FindClose( hFind );
 
+    return TRUE;
+}
+#else
+/**
+ * @brief lists directory contents
+ * @param dir path to directory
+ * @param contents output list
+ * @return TRUE if success otherwise FALSE
+ */
+inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
+{
+    contents->files = DArray_Init( int8_t* );
+    contents->directories = DArray_Init( int8_t* );
+
+    struct dirent** namelist;
+    int32_t n;
+
+    n = scandir( ".", &namelist, NULL, alphasort );
+    if ( n < 0 )
+    {
+        LOG_ERROR( "Scanning dir %s\n", dir );
+        return FALSE;
+    }
+    else
+    {
+        int32_t tempN = n;
+        while ( tempN-- )
+        {
+            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( namelist[ tempN ]->d_name != "." ) &&
+                 ( namelist[ tempN ]->d_name != ".." ) )
+            {
+                DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
+                                                                       DString_Length( namelist[ tempN ]->d_name ) ) );
+            }
+            else if ( ( namelist[ tempN ]->d_name != "." ) && ( namelist[ tempN ]->d_name != ".." ) )
+            {
+                DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
+                                                                       DString_Length( namelist[ tempN ]->d_name ) ) );
+            }
+            CFREE( namelist[ tempN ], sizeof( struct dirent ) );
+        }
+        CFREE( namelist, n );
+    }
     return TRUE;
 }
 #endif

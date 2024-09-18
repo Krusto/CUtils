@@ -63,6 +63,7 @@ Macro Definitions
 #define DArray_Data( arr ) ( ( _DArrayType* ) arr )->data
 #define DArray_Size( arr ) ( sizeof( _DArrayType ) + DArrayLength( arr ) * ( _DArrayType* ) arr->elementSize )
 #define DArray_Capacity( arr ) ( ( _DArrayType* ) arr )->capacity
+#define DArray_ElementSize( arr ) ( ( _DArrayType* ) arr )->elementSize
 
 #define DArray_Reserve( arr, capacity ) arr_reserve( ( _DArrayType* ) &arr, capacity )
 
@@ -71,6 +72,11 @@ Macro Definitions
 #define DArray_Push( arr, value )                                                                                      \
     DArray_Resize( arr, arr->length + 1 );                                                                             \
     DArray_MEMSET( arr, arr->length - 1, value )
+
+#define DArray_PushStr( arr, ptr )                                                                                     \
+    DArray_Resize( ( _DArrayType* ) arr, DArray_Length( ( _DArrayType* ) arr ) + 1 );                                  \
+    ( ( int8_t** ) DArray_Data( arr ) )[ ( DArray_Length( arr ) - 1 ) ] = ptr;
+
 
 #define DArray_Insert( arr, index, value )                                                                             \
     {                                                                                                                  \
@@ -90,15 +96,19 @@ Macro Definitions
     }
 #define DArray_Pop( arr ) arr_pop( arr )
 
-#define DArray_Get( arr, index ) &arr->data[ index * arr->elementSize ]
-#define DArray_Front( arr ) &arr->data[ 0 ]
-#define DArray_Back( arr ) DArray_Get( arr, ( arr->length - 1 ) )
+#define DArray_Get( arr, index ) &( ( _DArrayType* ) arr )->data[ index * ( ( _DArrayType* ) arr )->elementSize ]
+#define DArray_GetStr( arr, index ) ( ( int8_t** ) ( ( ( _DArrayType* ) arr )->data ) )[ ( index ) ]
+
+#define DArray_Front( arr ) &( ( _DArrayType* ) arr )->data[ 0 ]
+#define DArray_Back( arr ) DArray_Get( arr, ( ( ( _DArrayType* ) arr )->length - 1 ) )
 
 #define DArray_Empty( arr ) ( 0 == arr->length )
 
 #define DArray_Destroy( arr )                                                                                          \
     CFREE( arr->data, arr->length );                                                                                   \
     CFREE( arr, sizeof( arr ) )
+
+#define DStrArray_Destroy( arr ) str_arr_destroy( ( _DArrayType* ) arr )
 
 #define DArray_Shrink_To_Fit( arr ) arr_shrinkToFit( arr )
 
@@ -128,8 +138,6 @@ typedef struct {
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/
-
-
 inline static void arr_resize( _DArrayType* buf, size_t newLength )
 {
     if ( newLength > buf->length )
@@ -153,6 +161,18 @@ inline static void arr_resize( _DArrayType* buf, size_t newLength )
         else { buf->length = newLength; }
     }
     else { buf->length = newLength; }
+}
+
+inline static void str_arr_destroy( _DArrayType* buf )
+{
+
+    for ( size_t i = 0; i < DArray_Length( buf ); i++ )
+    {
+        char* str = DArray_GetStr( buf, i );
+        CFREE( str, DString_Length( str ) );
+    }
+    CFREE( buf->data, buf->length * buf->elementSize );
+    CFREE( buf, sizeof( _DArrayType ) );
 }
 
 inline static void* arr_create( size_t stride )

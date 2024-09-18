@@ -1,5 +1,5 @@
-#ifndef CLOG_HEADER
-#define CLOG_HEADER
+#ifndef DSTRING_HEADER
+#define DSTRING_HEADER
 /**
  * @file
  * @author Krusto Stoyanov ( k.stoianov2@gmail.com )
@@ -32,51 +32,58 @@
  * 
  * @section DESCRIPTION
  * 
- * CLog Header
+ * C Dynamic String Header
  */
 
 
 /***********************************************************************************************************************
 Includes
 ***********************************************************************************************************************/
-#ifndef NO_STD_LOG
-#include <stdio.h>
+#include "CLog.h"
+#include "STDTypes.h"
+
+#ifndef NO_STD_MALLOC
+#include <stdlib.h>
+#include <string.h>
 #endif
+#include "CMemory.h"
+
 /***********************************************************************************************************************
 Macro Definitions
 ***********************************************************************************************************************/
 
-// clang-format off
-#ifndef NO_STD_LOG
-    #define LOG( ... ) printf( __VA_ARGS__ )
-    #define LOG_ERROR( ... )                                                                                               \
-        LOG( "Error: " );                                                                                                  \
-        printf( __VA_ARGS__ )
-    
-    #ifdef CUTILS_VERBOSE
-        #define LOG_INFO( ... )                                                                                                \
-            LOG( "Info: " );                                                                                                   \
-            printf( __VA_ARGS__ )
-    #else   
-        #define LOG_INFO( ... )
-    #endif
-    #ifdef NDEBUG
-        #define LOG_DEBUG(...)
-    #else
-        #define LOG_DEBUG(...)\
-            LOG("Debug: ");\
-            printf(__VA_ARGS__)
-    #endif
 
-#else
-    #define LOG( ... )
-    #define LOG_INFO( ... )
-    #define LOG_DEBUG(...)
-
-#endif
-// clang-format on
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/
 
-#endif// CLOG_HEADER
+/**
+ * @brief Creates dynamic string from a string allocated on the stack
+ * @param buff 
+ * @param size 
+ * @return 
+ */
+inline static int8_t* DString_Create( int8_t* buff, size_t size )
+{
+    int8_t* memory = ( int8_t* ) CMALLOC( size );
+    int8_t* resultPtr = NULL;
+    resultPtr = ( int8_t* ) CMEMCPY( memory, buff, size );
+    if ( NULL == resultPtr ) { LOG_ERROR( "Can not create string!\n" ); }
+
+    return resultPtr;
+}
+
+/**
+ * @brief Returns the length between the null termination and start of the string
+ * @param str 
+ * @return 
+ */
+inline static size_t DString_Length( const int8_t* str )
+{
+    const int8_t* s;
+
+    for ( s = str; *s; ++s )
+        ;
+    return ( s - str );
+}
+#endif// DSTRING_HEADER
