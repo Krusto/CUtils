@@ -41,8 +41,17 @@ Includes
 ***********************************************************************************************************************/
 #include "CLog.h"
 #include "CMemory.h"
+#include "DArray.h"
 #include "STDTypes.h"
+
+#ifndef NO_STD_MALLOC
 #include <stdio.h>
+#include <stdlib.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 /***********************************************************************************************************************
 Macro Definitions
@@ -63,6 +72,11 @@ typedef enum
     FILE_UNKNOWN_ERROR,
     FILE_BUFFER_ALLOCATION_ERROR
 } FileOpResultType;
+
+typedef struct {
+    const int8_t* path;
+    DArray_t( int8_t*, files );
+} FolderContentsType;
 
 /***********************************************************************************************************************
 Static functions implementation
@@ -153,7 +167,7 @@ FileOpResultType file_read_string( const int8_t* filename, size_t* filesize, uin
         {
             // Read the file into the buffer
             fread( *buffer, 1, *filesize, fileIn );
-            (*buffer)[ *filesize ] = '\0';// Null-terminate for safe string handling
+            ( *buffer )[ *filesize ] = '\0';// Null-terminate for safe string handling
         }
 
         fclose( fileIn );
@@ -240,4 +254,38 @@ FileOpResultType file_write_binary( const int8_t* filename, const uint8_t* buffe
 
     return result;
 }
+
+#ifdef _WIN32
+BOOL list_directory_contents( const int8_t* dir )
+{
+    WIN32_FIND_DATA fdFile;
+    HANDLE hFind = NULL;
+
+    int8_t sPath[ 2048 ];
+
+    //Specify a file mask. *.* = We want everything!
+    sprintf( sPath, "%s\\*.*", dir );
+
+    if ( ( hFind = FindFirstFile( sPath, &fdFile ) ) == INVALID_HANDLE_VALUE )
+    {
+        LOG_ERROR( "Path not found: [%s]\n", dir );
+        return FALSE;
+    }
+
+    do {
+        if ( strcmp( fdFile.cFileName, "." ) != 0 && strcmp( fdFile.cFileName, ".." ) != 0 )
+        {
+            sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
+
+            if ( fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) { LOG_INFO( "Directory: %s\n", sPath ); }
+            else { LOG_INFO( "File: %s\n", sPath ); }
+        }
+    } while ( FindNextFile( hFind, &fdFile ) );//Find the next file.
+
+    FindClose( hFind );//Always, Always, clean things up!
+
+    return TRUE;
+}
+#endif
+
 #endif// CFILESYSTEM_HEADER

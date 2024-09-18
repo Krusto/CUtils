@@ -46,159 +46,206 @@ Includes
 Macro Definitions
 ***********************************************************************************************************************/
 
-#define DArray_t( t, name )                                                                                            \
-    typedef struct {                                                                                                   \
-        t* data;                                                                                                       \
-        size_t length;                                                                                                 \
-        size_t capacity;                                                                                               \
-        size_t elementSize;                                                                                            \
-    } DArray_##t##_t;                                                                                                  \
-    DArray_##t##_t name;                                                                                               \
-    name.elementSize = sizeof( t );                                                                                    \
-    name.length = 0;                                                                                                   \
-    name.data = NULL;                                                                                                  \
-    name.capacity = 0
+#define DARRAY_INITIAL_CAPACITY 1u
+#define DARRAY_RESIZE_FACTOR 2u
+#define DARRAY_LENGTH_OFFSET 0u
+#define DARRAY_LENGTH_SIZE sizeof( size_t )
+#define DARRAY_CAPACITY_OFFSET DARRAY_LENGTH_OFFSET + DARRAY_LENGTH_SIZE
+#define DARRAY_CAPACITY_SIZE sizeof( size_t )
+#define DARRAY_ELEMENT_SIZE_OFFSET DARRAY_CAPACITY_OFFSET + DARRAY_CAPACITY_SIZE
+#define DARRAY_ELEMENT_SIZE_SIZE sizeof( size_t )
+#define DARRAY_DATA_OFFSET DARRAY_ELEMENT_SIZE_OFFSET + DARRAY_ELEMENT_SIZE_SIZE
 
-#define DArray_Init( arr )                                                                                             \
-    arr.length = 0;                                                                                                    \
-    arr.data = NULL;                                                                                                   \
-    arr.capacity = 0;
+#define DArray_t( t, name ) t* name
 
-#define DArray_Length( arr ) arr.length
-#define DArray_Data( arr ) arr.data
-#define DArray_Size( arr ) arr.length* arr.elementSize
-#define DArray_Capacity( arr ) arr.capacity
+#define DArray_Init( type ) arr_create( sizeof( type ) )
+#define DArray_Length( arr ) ( ( _DArrayType* ) arr )->length
+#define DArray_Data( arr ) ( ( _DArrayType* ) arr )->data
+#define DArray_Size( arr ) ( sizeof( _DArrayType ) + DArrayLength( arr ) * ( _DArrayType* ) arr->elementSize )
+#define DArray_Capacity( arr ) ( ( _DArrayType* ) arr )->capacity
 
-#define DArray_Reserve( arr, capacity )                                                                                \
-    arr_reserve( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, capacity )
+#define DArray_Reserve( arr, capacity ) arr_reserve( ( _DArrayType* ) &arr, capacity )
 
-#define DArray_Resize( arr, newLength )                                                                                \
-    arr_resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, newLength )
+#define DArray_Resize( arr, newLength ) arr_resize( arr, newLength )
 
 #define DArray_Push( arr, value )                                                                                      \
-    DArray_Resize( arr, arr.length + 1 );                                                                              \
-    arr.data[ arr.length - 1 ] = value
+    DArray_Resize( arr, arr->length + 1 );                                                                             \
+    DArray_MEMSET( arr, arr->length - 1, value )
 
 #define DArray_Insert( arr, index, value )                                                                             \
-    DArray_Resize( arr, arr.length + 1 );                                                                              \
-    if ( index < arr.length )                                                                                          \
     {                                                                                                                  \
-        void* resultPtr = NULL;                                                                                        \
-        if ( NULL != arr.data )                                                                                        \
+        DArray_Resize( arr, arr->length + 1 );                                                                         \
+        if ( index < arr->length )                                                                                     \
         {                                                                                                              \
-            size_t len = ( arr.length ) - ( index + 1 );                                                               \
-            void* next = &arr.data[ index + 1 ];                                                                       \
-            void* current = &arr.data[ index ];                                                                        \
-            resultPtr = CMEMCPY( next, current, len * arr.elementSize );                                               \
-            if ( NULL != resultPtr ) { arr.data[ index ] = value; }                                                    \
+            void* resultPtr = NULL;                                                                                    \
+            if ( NULL != arr->data )                                                                                   \
+            {                                                                                                          \
+                size_t len = ( arr->length ) - ( index + 1 );                                                          \
+                void* next = ( void* ) &arr->data[ index * arr->elementSize + arr->elementSize ];                      \
+                void* current = &arr->data[ index * arr->elementSize ];                                                \
+                resultPtr = CMEMCPY( next, current, len * arr->elementSize );                                          \
+                if ( NULL != resultPtr ) { DArray_MEMSET( arr, index, value ); }                                       \
+            }                                                                                                          \
         }                                                                                                              \
     }
+#define DArray_Pop( arr ) arr_pop( arr )
 
-#define DArray_Pop( arr )                                                                                              \
-    arr.data[ arr.length - 1 ];                                                                                        \
-    arr_resize( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, arr.length - 1 )
+#define DArray_Get( arr, index ) &arr->data[ index * arr->elementSize ]
+#define DArray_Front( arr ) &arr->data[ 0 ]
+#define DArray_Back( arr ) DArray_Get( arr, ( arr->length - 1 ) )
 
-#define DArray_Get( arr, index ) arr.data[ index ]
-#define DArray_Front( arr ) arr.data[ 0 ]
-#define DArray_Back( arr ) arr.data[ arr.length - 1 ]
-
-#define DArray_Empty( arr ) ( 0 == arr.length )
+#define DArray_Empty( arr ) ( 0 == arr->length )
 
 #define DArray_Destroy( arr )                                                                                          \
-    CFREE( arr.data, arr.capacity );                                                                                   \
-    arr.length = 0;                                                                                                    \
-    arr.capacity = 0;                                                                                                  \
-    arr.data = NULL
+    CFREE( arr->data, arr->length );                                                                                   \
+    CFREE( arr, sizeof( arr ) )
 
-#define DArray_Shrink_To_Fit( arr ) arr_shrinkToFit( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity )
+#define DArray_Shrink_To_Fit( arr ) arr_shrinkToFit( arr )
 
-#define DArray_Erase( arr, index ) arr_erase( ( void** ) &arr.data, &arr.length, arr.elementSize, &arr.capacity, index )
+#define DArray_Erase( arr, index ) arr_erase( arr, index )
+
+#define DARRAY_HEADER_SIZE sizeof( size_t ) * 3
+
+
+#define DArray_MEMSET( arr, index, value )                                                                             \
+    for ( size_t currElementIndex = 0; currElementIndex < arr->elementSize; currElementIndex++ )                       \
+    {                                                                                                                  \
+        CMEMSET( &arr->data[ ( index ) * arr->elementSize + currElementIndex ],                                        \
+                 ( ( value >> ( currElementIndex * 8 ) ) & 0xFF ), 1 );                                                \
+    }
+
+/***********************************************************************************************************************
+Type definitions
+***********************************************************************************************************************/
+
+typedef struct {
+    size_t length;
+    size_t capacity;
+    size_t elementSize;
+    void* data;
+} _DArrayType;
 
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/
 
-inline static void arr_erase( void** buf, size_t* length, const size_t elementSize, size_t* capacity, size_t index )
+
+inline static void arr_resize( _DArrayType* buf, size_t newLength )
 {
-    if ( index < *length )
+    if ( newLength > buf->length )
     {
-        void* resultPtr = NULL;
-        if ( NULL != *buf )
-        {
-            void* dest = &( ( *buf )[ index ] );
-            void* src = &( ( *buf )[ index + elementSize ] );
-            resultPtr = CMEMCPY( dest, src, ( *length - index ) );
-        }
-        if ( NULL != resultPtr ) { *length -= 1; }
-    }
-}
-
-inline static void arr_insert( void** buf, size_t* length, const size_t elementSize, size_t* capacity, uint32_t index,
-                               void* element )
-{
-    void* src = &( ( *buf )[ index ] );
-    void* dest = &( ( *buf )[ index + elementSize ] );
-    void* resultPtr = NULL;
-
-    resultPtr = CMEMCPY( dest, src, ( *length - index - 1 ) );
-
-    if ( NULL != resultPtr ) { resultPtr = CMEMCPY( src, element, elementSize ); }
-}
-
-inline static void arr_shrinkToFit( void** buf, size_t* length, const size_t elementSize, size_t* capacity )
-{
-    if ( *capacity > *length )
-    {
-        void* resultPtr = NULL;
-        if ( NULL != *buf ) { resultPtr = CREALLOC( *buf, *length * elementSize ); }
-        if ( NULL != resultPtr )
-        {
-            *capacity = *length;
-            *buf = resultPtr;
-        }
-    }
-}
-
-inline static void arr_reserve( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
-                                size_t newCapacity )
-{
-    if ( newCapacity > *capacity )
-    {
-        void* resultPtr;
-
-        if ( NULL == *buf ) { resultPtr = CMALLOC( newCapacity * elementSize ); }
-        else { resultPtr = CREALLOC( *buf, newCapacity * elementSize ); }
-
-        if ( NULL != resultPtr )
-        {
-            *buf = resultPtr;
-            *capacity = newCapacity;
-        }
-    }
-}
-
-inline static void arr_resize( void** buf, size_t* length, const size_t elementSize, size_t* capacity,
-                               size_t newLength )
-{
-    if ( newLength > *length )
-    {
-        if ( newLength > *capacity )
+        if ( newLength > buf->capacity )
         {
             void* resultPtr;
             size_t newCapacity = newLength * 2;
 
-            if ( NULL == *buf ) { resultPtr = CMALLOC( newCapacity * elementSize ); }
-            else { resultPtr = CREALLOC( *buf, newCapacity * elementSize ); }
+            if ( NULL == buf->data ) { resultPtr = CMALLOC( newCapacity * ( buf->elementSize ) ); }
+            else { resultPtr = CREALLOC( buf->data, newCapacity * ( buf->elementSize ) ); }
+            if ( NULL == resultPtr ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
 
             if ( NULL != resultPtr )
             {
-                *buf = resultPtr;
-                *length = newLength;
-                *capacity = newCapacity;
+                buf->data = resultPtr;
+                buf->length = newLength;
+                buf->capacity = newCapacity;
             }
         }
-        else { *length = newLength; }
+        else { buf->length = newLength; }
     }
-    else { *length = newLength; }
+    else { buf->length = newLength; }
+}
+
+inline static void* arr_create( size_t stride )
+{
+    _DArrayType* result = NULL;
+
+    result = ( _DArrayType* ) CMALLOC( DARRAY_HEADER_SIZE + stride );
+
+    if ( NULL == result ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
+    else
+    {
+        result->length = 0;                        // set length to 0
+        result->capacity = DARRAY_INITIAL_CAPACITY;// set capacity to DARRAY_INITIAL_CAPACITY
+        result->elementSize = stride;              // set element size to stride
+    }
+
+    uint8_t* dataPtr = ( uint8_t* ) CMALLOC( stride );
+    if ( NULL == result ) { LOG_ERROR( "Can not allocate array buffer!\n" ); }
+    else { result->data = dataPtr; }
+
+    return ( void* ) result;
+}
+
+inline static void arr_erase( _DArrayType* buf, size_t index )
+{
+    if ( index < buf->length )
+    {
+        void* resultPtr = NULL;
+        if ( NULL != buf->data )
+        {
+            void* dest = &( buf->data[ index ] );
+            void* src = &( buf->data[ index + buf->elementSize ] );
+            resultPtr = CMEMCPY( dest, src, ( buf->length - index ) );
+            if ( NULL == resultPtr ) { LOG_ERROR( "Can not copy array buffer!\n" ); }
+        }
+        if ( NULL != resultPtr ) { buf->length -= 1; }
+    }
+}
+
+inline static void arr_insert( _DArrayType* buf, uint32_t index, void* element )
+{
+    void* src = &( buf->data[ index ] );
+    void* dest = &( buf->data[ index + buf->elementSize ] );
+    void* resultPtr = NULL;
+
+    resultPtr = CMEMCPY( dest, src, ( buf->length - index - 1 ) );
+
+    if ( NULL == resultPtr ) { LOG_ERROR( "Can not copy array buffer!\n" ); }
+    if ( NULL != resultPtr ) { resultPtr = CMEMCPY( src, element, buf->elementSize ); }
+}
+
+inline static void arr_shrinkToFit( _DArrayType* buf )
+{
+    if ( buf->capacity > buf->length )
+    {
+        void* resultPtr = NULL;
+        if ( NULL != buf->data ) { resultPtr = CREALLOC( buf->data, buf->length * buf->elementSize ); }
+        if ( NULL == resultPtr ) { LOG_ERROR( "Can not reallocate array buffer!\n" ); }
+        if ( NULL != resultPtr )
+        {
+            buf->capacity = buf->length;
+            buf->data = resultPtr;
+        }
+    }
+}
+
+inline static void arr_reserve( _DArrayType* buf, size_t newCapacity )
+{
+    if ( newCapacity > buf->capacity )
+    {
+        void* resultPtr;
+
+        if ( NULL == buf->data ) { resultPtr = CMALLOC( newCapacity * buf->elementSize ); }
+        else { resultPtr = CREALLOC( buf->data, newCapacity * buf->elementSize ); }
+
+        if ( NULL == resultPtr ) { LOG_ERROR( "Can not allocate array buffer!\n" ); }
+        if ( NULL != resultPtr )
+        {
+            buf->data = resultPtr;
+            buf->capacity = newCapacity;
+        }
+    }
+}
+
+inline static void* arr_pop( _DArrayType* buf )
+{
+    void* valuePtr = NULL;
+    if ( buf->length > 0 )
+    {
+        valuePtr = DArray_Back( buf );
+        buf->length -= 1;
+    }
+    else { LOG_ERROR( "Can not pop from array with size < 0!\n" ); }
+    return valuePtr;
 }
 #endif// DARRAY_HEADER
