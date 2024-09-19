@@ -19,18 +19,18 @@ int main( void )
 
     for ( size_t i = 0; i < DArray_Length( myArray ); i++ )
     {
-    printf( "%X ", *( unsigned int* ) DArray_Get( myArray, i ) );
+        printf( "%X ", *( unsigned int* ) DArray_Get( myArray, i ) );
     }
     printf( "\n" );
 
-     DArray_Insert( myArray, 0, 10 );
+    DArray_Insert( myArray, 0, 10 );
     DArray_Insert( myArray, 1, 30 );
-     printf( "Capacity: %d\n", DArray_Capacity( myArray ) );
+    printf( "Capacity: %d\n", DArray_Capacity( myArray ) );
 
-     uint32_t len = DArray_Length( myArray );
-     for ( size_t i = 0; i < len; i++ ) { printf( "%X ", *( unsigned int* ) DArray_Get( myArray, i ) ); }
+    uint32_t len = DArray_Length( myArray );
+    for ( size_t i = 0; i < len; i++ ) { printf( "%X ", *( unsigned int* ) DArray_Get( myArray, i ) ); }
 
-     DArray_Destroy( myArray );
+    DArray_Destroy( myArray );
 
     FolderContentsType f;
     list_directory_contents( "../../", &f );

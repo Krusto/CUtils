@@ -201,7 +201,7 @@ inline static void* arr_create( size_t stride )
 {
     _DArrayType* result = NULL;
 
-    result = ( _DArrayType* ) CMALLOC( sizeof(_DArrayType));
+    result = ( _DArrayType* ) CMALLOC( sizeof( _DArrayType ) );
 
     if ( NULL == result ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
     else
