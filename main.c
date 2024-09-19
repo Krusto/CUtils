@@ -32,7 +32,7 @@ int main( void )
 
     // DArray_Destroy( myArray );
     FolderContentsType f;
-    list_directory_contents( "C:\\Users\\Krusto", &f );
+    list_directory_contents( "~/Projects/CUtil/test/", &f );
 
     free_folder_contents_struct( &f );
     return 0;

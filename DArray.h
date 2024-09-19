@@ -60,7 +60,7 @@ Macro Definitions
 #define DArray_t( t, name ) t* name
 
 #define DArray_Init( type ) arr_create( sizeof( type ) )
-#define DStrArray_Init() str_arr_create( sizeof( int8_t ) )
+#define DStrArray_Init() str_arr_create( sizeof( int8_t** ) )
 
 #define DArray_Length( arr ) ( ( _DArrayType* ) arr )->length
 #define DArray_Data( arr ) ( ( _DArrayType* ) arr )->data
@@ -181,8 +181,9 @@ inline static void str_arr_destroy( _DArrayType* buf )
         }
         if ( buf->data )
         {
-            CMEMSET( buf->data, 0, buf->length );
+         //   CMEMSET( buf->data, 0, buf->length );
             CFREE( buf->data, buf->length );
+            
         }
         CFREE( ( void* ) buf, DARRAY_HEADER_SIZE + sizeof( int8_t* ) );
     }
@@ -193,7 +194,7 @@ inline static void* str_arr_create( size_t stride )
     _DArrayType* result = NULL;
 
     LOG_INFO( "Allocating String Array Struct\n" );
-    result = ( _DArrayType* ) CMALLOC( DARRAY_HEADER_SIZE + stride );
+    result = ( _DArrayType* ) CMALLOC( sizeof(_DArrayType) );
 
     if ( NULL == result ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
     else

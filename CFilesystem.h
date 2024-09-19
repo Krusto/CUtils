@@ -78,8 +78,8 @@ typedef enum
 
 typedef struct {
     const int8_t* path;
-    DArray_t( int8_t*, files );
-    DArray_t( int8_t*, directories );
+    _DArrayType* files;
+    _DArrayType* directories;
 } FolderContentsType;
 
 /***********************************************************************************************************************
@@ -265,7 +265,7 @@ inline static FileOpResultType file_write_binary( const int8_t* filename, const 
  */
 inline static void free_folder_contents_struct( FolderContentsType* contents )
 {
-    // if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
+    if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
 
     if ( NULL != contents->directories ) { DStrArray_Destroy( contents->directories ); }
 }
@@ -331,8 +331,8 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
  */
 inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
 {
-    contents->files = DArray_Init( int8_t* );
-    contents->directories = DArray_Init( int8_t* );
+    contents->files = DStrArray_Init();
+    contents->directories = DStrArray_Init();
 
     struct dirent** namelist;
     int32_t n;
@@ -348,15 +348,15 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
         int32_t tempN = n;
         while ( tempN-- )
         {
-            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( namelist[ tempN ]->d_name != "." ) &&
-                 ( namelist[ tempN ]->d_name != ".." ) )
+            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( strcmp(namelist[ tempN ]->d_name,".") ) &&
+                  strcmp(namelist[ tempN ]->d_name, ".." ) )
             {
                 DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
                                                                        DString_Length( namelist[ tempN ]->d_name ) ) );
             }
-            else if ( ( namelist[ tempN ]->d_name != "." ) && ( namelist[ tempN ]->d_name != ".." ) )
+            else if ( strcmp( namelist[ tempN ]->d_name ,"." ) && strcmp( namelist[ tempN ]->d_name ,".." ) )
             {
-                DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
+                DArray_PushStr( contents->files, DString_Create( namelist[ tempN ]->d_name,
                                                                        DString_Length( namelist[ tempN ]->d_name ) ) );
             }
             CFREE( namelist[ tempN ], sizeof( struct dirent ) );
