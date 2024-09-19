@@ -33,7 +33,7 @@ int main( void )
     // DArray_Destroy( myArray );
 
     FolderContentsType f;
-    list_directory_contents( "path", &f );
+    list_directory_contents( "../../", &f );
 
     free_folder_contents_struct( &f );
     return 0;

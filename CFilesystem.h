@@ -327,6 +327,8 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
     return TRUE;
 }
 #else
+
+#include <errno.h>
 /**
  * @brief lists directory contents
  * @param dir path to directory
@@ -341,10 +343,10 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
     struct dirent** namelist;
     int32_t n;
 
-    n = scandir( ".", &namelist, NULL, alphasort );
+    n = scandir( dir, &namelist, NULL, alphasort );
     if ( n < 0 )
     {
-        LOG_ERROR( "Scanning dir %s\n", dir );
+        LOG_ERROR( "Scanning dir %s\nError: %s", dir,strerror(errno) );
         return FALSE;
     }
     else
@@ -352,16 +354,18 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
         int32_t tempN = n;
         while ( tempN-- )
         {
-            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( strcmp( namelist[ tempN ]->d_name, "." ) ) &&
-                 strcmp( namelist[ tempN ]->d_name, ".." ) )
+            BOOL skip = FALSE;
+
+            if(namelist[tempN]->d_name[0] == '.'){skip = TRUE;}
+
+            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && (FALSE == skip ) )
             {
                 DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
                                                                        DString_Length( namelist[ tempN ]->d_name ) ) );
             }
-            else if ( strcmp( namelist[ tempN ]->d_name, "." ) && strcmp( namelist[ tempN ]->d_name, ".." ) )
+            else if(FALSE == skip)
             {
-                DArray_PushStr( contents->files, DString_Create( namelist[ tempN ]->d_name,
-                                                                 DString_Length( namelist[ tempN ]->d_name ) ) );
+                DArray_PushStr( contents->files, DString_Create(namelist[tempN]->d_name,DString_Length(namelist[tempN]->d_name)));
             }
             CFREE( namelist[ tempN ], sizeof( struct dirent ) );
         }
