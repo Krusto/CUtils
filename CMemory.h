@@ -47,11 +47,23 @@ Includes
 /***********************************************************************************************************************
 Macro Definitions
 ***********************************************************************************************************************/
+
+void* CMALLOC( size_t size )
+{
+    printf( "Allocated %zuB\n", size );
+    return malloc( size );
+}
+
+void CFREE( void* ptr, size_t size )
+{
+    printf( "Deallocated %zuB\n", size );
+    free( ptr );
+}
 #ifndef NO_STD_MALLOC
 #define CMEMCPY( dest, p, size ) memcpy( dest, p, size )
-#define CMALLOC( size ) malloc( size )
+// #define CMALLOC( size ) malloc( size )
 #define CREALLOC( p, new_size ) realloc( p, new_size )
-#define CFREE( p, size ) free( p )
+// #define CFREE( p, size ) free( p )
 #define CMEMSET( p, value, size ) memset( p, value, size )
 #else
 #define CMEMCPY( dest, p, size )

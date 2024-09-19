@@ -265,7 +265,8 @@ inline static FileOpResultType file_write_binary( const int8_t* filename, const 
  */
 inline static void free_folder_contents_struct( FolderContentsType* contents )
 {
-    if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
+    // if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
+
     if ( NULL != contents->directories ) { DStrArray_Destroy( contents->directories ); }
 }
 
@@ -278,8 +279,8 @@ inline static void free_folder_contents_struct( FolderContentsType* contents )
  */
 inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
 {
-    contents->files = DArray_Init( int8_t* );
-    contents->directories = DArray_Init( int8_t* );
+    // contents->files = DStrArray_Init();
+    contents->directories = DStrArray_Init();
 
     WIN32_FIND_DATA fdFile;
     HANDLE hFind = NULL;
@@ -303,12 +304,16 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
         if ( ( FALSE == skip ) && ( fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
         {
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
-            DArray_PushStr( contents->directories, DString_Create( sPath, DString_Length( sPath ) ) );
+
+            int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
+            printf( "%s %zu\n", str, strlen( str ) + 1 );
+
+            DArray_PushStr( contents->directories, str );
         }
         else if ( ( FALSE == skip ) )
         {
-            sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
-            DArray_PushStr( contents->files, DString_Create( sPath, DString_Length( sPath ) ) );
+            // sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
+            // DArray_PushStr( contents->files, DString_Create( sPath, DString_Length( sPath ) ) );
         }
 
     } while ( FindNextFile( hFind, &fdFile ) );//Find the next file.
