@@ -279,7 +279,7 @@ inline static void free_folder_contents_struct( FolderContentsType* contents )
  */
 inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
 {
-    // contents->files = DStrArray_Init();
+    contents->files = DStrArray_Init();
     contents->directories = DStrArray_Init();
 
     WIN32_FIND_DATA fdFile;
@@ -299,21 +299,25 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
     do {
 
         BOOL skip = FALSE;
-        if ( strcmp( fdFile.cFileName, "." ) != 0 && strcmp( fdFile.cFileName, ".." ) != 0 ) { skip = TRUE; }
+        //skip path/. and path/..
+        if ( fdFile.cFileName[ 0 ] == '.' ) { skip = TRUE; }
 
         if ( ( FALSE == skip ) && ( fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
         {
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
             int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            printf( "%s %zu\n", str, strlen( str ) + 1 );
+            printf( "%s %zu\n", fdFile.cFileName, strlen( str ) + 1 );
 
             DArray_PushStr( contents->directories, str );
         }
         else if ( ( FALSE == skip ) )
         {
-            // sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
-            // DArray_PushStr( contents->files, DString_Create( sPath, DString_Length( sPath ) ) );
+            sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
+
+            int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
+            printf( "%s %zu\n", fdFile.cFileName, strlen( str ) + 1 );
+            DArray_PushStr( contents->files, str );
         }
 
     } while ( FindNextFile( hFind, &fdFile ) );//Find the next file.
@@ -348,16 +352,16 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
         int32_t tempN = n;
         while ( tempN-- )
         {
-            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( strcmp(namelist[ tempN ]->d_name,".") ) &&
-                  strcmp(namelist[ tempN ]->d_name, ".." ) )
+            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( strcmp( namelist[ tempN ]->d_name, "." ) ) &&
+                 strcmp( namelist[ tempN ]->d_name, ".." ) )
             {
                 DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
                                                                        DString_Length( namelist[ tempN ]->d_name ) ) );
             }
-            else if ( strcmp( namelist[ tempN ]->d_name ,"." ) && strcmp( namelist[ tempN ]->d_name ,".." ) )
+            else if ( strcmp( namelist[ tempN ]->d_name, "." ) && strcmp( namelist[ tempN ]->d_name, ".." ) )
             {
                 DArray_PushStr( contents->files, DString_Create( namelist[ tempN ]->d_name,
-                                                                       DString_Length( namelist[ tempN ]->d_name ) ) );
+                                                                 DString_Length( namelist[ tempN ]->d_name ) ) );
             }
             CFREE( namelist[ tempN ], sizeof( struct dirent ) );
         }

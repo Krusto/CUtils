@@ -148,11 +148,7 @@ inline static void arr_resize( _DArrayType* buf, size_t newLength )
             void* resultPtr;
             size_t newCapacity = newLength * 2;
 
-            if ( NULL == buf->data )
-            {
-                LOG_INFO( "Allocating Array Data\n" );
-                resultPtr = CMALLOC( newCapacity * ( buf->elementSize ) );
-            }
+            if ( NULL == buf->data ) { resultPtr = CMALLOC( newCapacity * ( buf->elementSize ) ); }
             else { resultPtr = CREALLOC( buf->data, newCapacity * ( buf->elementSize ) ); }
             if ( NULL == resultPtr ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
 
@@ -175,16 +171,10 @@ inline static void str_arr_destroy( _DArrayType* buf )
         for ( size_t i = 0; i < DArray_Length( buf ); i++ )
         {
             int8_t* str = DArray_GetStr( buf, i );
-            LOG_INFO( "Deallocating string\n" );
             printf( "%s\n", str );
             CFREE( str, strlen( str ) + 1 );
         }
-        if ( buf->data )
-        {
-         //   CMEMSET( buf->data, 0, buf->length );
-            CFREE( buf->data, buf->length );
-            
-        }
+        if ( buf->data ) { CFREE( buf->data, buf->length ); }
         CFREE( ( void* ) buf, DARRAY_HEADER_SIZE + sizeof( int8_t* ) );
     }
 }
@@ -193,8 +183,7 @@ inline static void* str_arr_create( size_t stride )
 {
     _DArrayType* result = NULL;
 
-    LOG_INFO( "Allocating String Array Struct\n" );
-    result = ( _DArrayType* ) CMALLOC( sizeof(_DArrayType) );
+    result = ( _DArrayType* ) CMALLOC( sizeof( _DArrayType ) );
 
     if ( NULL == result ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
     else
@@ -212,7 +201,6 @@ inline static void* arr_create( size_t stride )
 {
     _DArrayType* result = NULL;
 
-    LOG_INFO( "Allocating Array Struct\n" );
     result = ( _DArrayType* ) CMALLOC( DARRAY_HEADER_SIZE + stride );
 
     if ( NULL == result ) { LOG_ERROR( "Can not allocate dynamic array!\n" ); }
@@ -222,7 +210,6 @@ inline static void* arr_create( size_t stride )
         result->capacity = DARRAY_INITIAL_CAPACITY;// set capacity to DARRAY_INITIAL_CAPACITY
         result->elementSize = stride;              // set element size to stride
     }
-    LOG_INFO( "Allocating Array Data\n" );
     uint8_t* dataPtr = ( uint8_t* ) CMALLOC( stride );
     if ( NULL == result ) { LOG_ERROR( "Can not allocate array buffer!\n" ); }
     else { result->data = dataPtr; }
@@ -279,11 +266,7 @@ inline static void arr_reserve( _DArrayType* buf, size_t newCapacity )
     {
         void* resultPtr;
 
-        if ( NULL == buf->data )
-        {
-            LOG_INFO( "Allocating Array Data\n" );
-            resultPtr = CMALLOC( newCapacity * buf->elementSize );
-        }
+        if ( NULL == buf->data ) { resultPtr = CMALLOC( newCapacity * buf->elementSize ); }
         else { resultPtr = CREALLOC( buf->data, newCapacity * buf->elementSize ); }
 
         if ( NULL == resultPtr ) { LOG_ERROR( "Can not allocate array buffer!\n" ); }

@@ -31,8 +31,9 @@ int main( void )
     // for ( size_t i = 0; i < len; i++ ) { printf( "%X ", *( unsigned int* ) DArray_Get( myArray, i ) ); }
 
     // DArray_Destroy( myArray );
+
     FolderContentsType f;
-    list_directory_contents( "~/Projects/CUtil/test/", &f );
+    list_directory_contents( "path", &f );
 
     free_folder_contents_struct( &f );
     return 0;

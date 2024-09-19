@@ -65,7 +65,6 @@ Static functions implementation
  */
 inline static int8_t* DString_Create( int8_t* buff, size_t size )
 {
-    LOG_INFO( "Allocating String\n" );
     int8_t* memory = ( int8_t* ) CMALLOC( size + 1 );
     int8_t* resultPtr = NULL;
     resultPtr = ( int8_t* ) CMEMCPY( memory, buff, size );
