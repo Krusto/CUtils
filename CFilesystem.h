@@ -341,8 +341,8 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
  */
 inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* contents)
 {
-    contents->files = DStrArray_Init();
-    contents->directories = DStrArray_Init();
+    contents->files = str_arr_create();
+    contents->directories = str_arr_create();
 
     struct dirent** namelist;
     int32_t n;
