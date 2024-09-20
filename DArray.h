@@ -51,22 +51,13 @@ Macro Definitions
 
 #define DArray_Create(type) arr_create(sizeof(type))
 
-#define DArray_Length(arr) ((DArrayT*) arr)->length
-#define DArray_Data(arr) ((DArrayT*) arr)->data
-#define DArray_Size(arr) (sizeof(DArrayT) + DArrayLength(arr) * (DArrayT*) arr->elementSize)
-#define DArray_Capacity(arr) ((DArrayT*) arr)->capacity
-#define DArray_ElementSize(arr) ((DArrayT*) arr)->elementSize
-
-#define DArray_Reserve(arr, capacity) arr_reserve((DArrayT*) &arr, capacity)
-#define DArray_Resize(arr, newLength) arr_resize(arr, newLength)
-
 #define DArray_Push(arr, value)                                                                                        \
-    DArray_Resize(arr, arr->length + 1);                                                                               \
+    arr_resize(arr, arr->length + 1);                                                                                  \
     DArray_MemsetElement(arr, arr->length - 1, value)
 
 #define DArray_Insert(arr, index, value)                                                                               \
     {                                                                                                                  \
-        DArray_Resize(arr, arr->length + 1);                                                                           \
+        arr_resize(arr, arr->length + 1);                                                                              \
         if (index < arr->length)                                                                                       \
         {                                                                                                              \
             void* resultPtr = NULL;                                                                                    \
@@ -80,30 +71,6 @@ Macro Definitions
             }                                                                                                          \
         }                                                                                                              \
     }
-#define DArray_Pop(arr) arr_pop(arr)
-
-#define DArray_Get(arr, index) &((DArrayT*) arr)->data[index * ((DArrayT*) arr)->elementSize]
-#define DArray_GetU32(arr, index) *((uint32_t*) DArray_Get(arr, index))
-#define DArray_GetU32P(arr, index) ((uint32_t*) DArray_Get(arr, index))
-#define DArray_GetU16(arr, index) *((uint16_t*) DArray_Get(arr, index))
-#define DArray_GetU16P(arr, index) ((uint16_t*) DArray_Get(arr, index))
-#define DArray_GetU8(arr, index) *((uint8_t*) DArray_Get(arr, index))
-#define DArray_GetU8P(arr, index) ((uint8_t*) DArray_Get(arr, index))
-
-#define DArray_Front(arr) &((DArrayT*) arr)->data[0]
-#define DArray_Back(arr) DArray_Get(arr, (((DArrayT*) arr)->length - 1))
-
-#define DArray_Empty(arr) (0 == arr->length)
-
-#define DArray_Destroy(arr)                                                                                            \
-    CFREE(arr->data, arr->length);                                                                                     \
-    CFREE(arr, sizeof(arr))
-
-#define DArray_Shrink_To_Fit(arr) arr_shring_to_fit(arr)
-
-#define DArray_Erase(arr, index) arr_erase(arr, index)
-
-#define DARRAY_HEADER_SIZE sizeof(size_t) * 3
 
 #define DArray_MemsetElement(arr, index, value)                                                                        \
     for (size_t currElementIndex = 0; currElementIndex < arr->elementSize; currElementIndex++)                         \
@@ -126,6 +93,30 @@ typedef struct {
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/
+inline static void* arr_get_ptr(DArrayT* arr, size_t index) { return &arr->data[index * arr->elementSize]; }
+
+inline static uint32_t arr_get_u32(DArrayT* arr, size_t index) { return *((uint32_t*) arr_get_ptr(arr, index)); }
+
+inline static uint32_t* arr_get_u32_ptr(DArrayT* arr, size_t index) { return ((uint32_t*) arr_get_ptr(arr, index)); }
+
+inline static uint16_t arr_get_u16(DArrayT* arr, size_t index) { return *((uint16_t*) arr_get_ptr(arr, index)); }
+
+inline static uint16_t* arr_get_u16_ptr(DArrayT* arr, size_t index) { return ((uint16_t*) arr_get_ptr(arr, index)); }
+
+inline static uint8_t arr_get_u8(DArrayT* arr, size_t index) { return *((uint8_t*) arr_get_ptr(arr, index)); }
+
+inline static uint8_t* arr_get_u8_ptr(DArrayT* arr, size_t index) { return ((uint8_t*) arr_get_ptr(arr, index)); }
+
+inline static void* arr_front_ptr(DArrayT* arr) { return arr_get_ptr(arr, 0); }
+
+inline static void* arr_back_ptr(DArrayT* arr) { return arr_get_ptr(arr, arr->length - 1); }
+
+inline static BOOL arr_is_empty(DArrayT* buf) { return (0u == buf->length); }
+
+inline static size_t arr_length(DArrayT* buf) { return buf->length; }
+
+inline static size_t arr_capacity(DArrayT* buf) { return buf->capacity; }
+
 inline static void arr_resize(DArrayT* buf, size_t newLength)
 {
     if (newLength > buf->length)
@@ -149,6 +140,12 @@ inline static void arr_resize(DArrayT* buf, size_t newLength)
         else { buf->length = newLength; }
     }
     else { buf->length = newLength; }
+}
+
+inline static void arr_destroy(DArrayT* buf)
+{
+    CFREE(buf->data, buf->length);
+    CFREE(buf, sizeof(buf));
 }
 
 inline static void* arr_create(size_t stride)
@@ -199,7 +196,7 @@ inline static void arr_insert(DArrayT* buf, uint32_t index, void* element)
     if (NULL != resultPtr) { resultPtr = CMEMCPY(src, element, buf->elementSize); }
 }
 
-inline static void arr_shring_to_fit(DArrayT* buf)
+inline static void arr_shrink_to_fit(DArrayT* buf)
 {
     if (buf->capacity > buf->length)
     {
@@ -237,7 +234,7 @@ inline static void* arr_pop(DArrayT* buf)
     void* valuePtr = NULL;
     if (buf->length > 0)
     {
-        valuePtr = DArray_Back(buf);
+        valuePtr = arr_back_ptr(buf);
         buf->length -= 1;
     }
     else { LOG_ERROR("Can not pop from array with size < 0!\n"); }
