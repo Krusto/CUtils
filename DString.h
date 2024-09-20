@@ -68,7 +68,7 @@ Macro Definitions
 
 #define DString_Create( str, size ) ( ( DStringT* ) str_create( str, size ) )
 
-#define CString_Length( str ) strlen( str )
+#define CString_Length( str ) c_str_length( str )
 #define DString_Length( str ) ( ( DStringT* ) str )->length
 #define DString_Data( str ) ( ( DStringT* ) str )->data
 #define DString_Size( str ) ( sizeof( DStringT ) + DString_Length( str ) + DSTRING_NULL_TERMINATION_LENGTH )
@@ -95,11 +95,11 @@ Macro Definitions
 
 #define DStrArray_Init() str_arr_create()
 
-#define DArray_PushStr( arr, ptr )                                                                                     \
+#define DStrArray_Push( arr, ptr )                                                                                     \
     DArray_Resize( ( DArrayT* ) arr, DArray_Length( ( DArrayT* ) arr ) + 1 );                                          \
     ( ( DStringT** ) DArray_Data( arr ) )[ ( DArray_Length( arr ) - 1 ) ] = ptr;
 
-#define DArray_GetStr( arr, index ) ( ( DStringT** ) ( ( ( DArrayT* ) arr )->data ) )[ index ]
+#define DStrArray_Get( arr, index ) ( ( DStringT** ) ( ( ( DArrayT* ) arr )->data ) )[ index ]
 
 #define DStrArray_Destroy( arr ) str_arr_destroy( ( DArrayT* ) arr )
 
@@ -146,7 +146,7 @@ inline static DStringT* str_create( const int8_t* str, size_t size )
     return result;
 }
 
-inline static size_t str_length( const int8_t* str )
+inline static size_t c_str_length( const int8_t* str )
 {
     const int8_t* int8_t_ptr;
     const uint32_t* longword_ptr;
@@ -328,10 +328,11 @@ inline static void str_arr_destroy( DArrayT* buf )
 {
     if ( NULL != buf )
     {
-        for ( size_t i = 0; i < DArray_Length( buf ); i++ ) { DString_Destroy( DArray_GetStr( buf, i ) ); }
+        for ( size_t i = 0; i < DArray_Length( buf ); i++ ) { DString_Destroy( DStrArray_Get( buf, i ) ); }
         if ( buf->data ) { CFREE( buf->data, buf->length ); }
         CFREE( ( void* ) buf, DARRAY_HEADER_SIZE + sizeof( int8_t* ) );
     }
 }
 
+inline static void str_append_cstring( DStringT* str, const int8_t* cstr ) {}
 #endif// DSTRING_HEADER

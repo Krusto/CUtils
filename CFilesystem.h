@@ -40,6 +40,7 @@ Includes
 ***********************************************************************************************************************/
 #include "CLog.h"
 #include "CMemory.h"
+#include "CStringView.h"
 #include "DArray.h"
 #include "DString.h"
 #include "STDTypes.h"
@@ -74,13 +75,17 @@ typedef enum
     FILE_NOT_FOUND_ERROR,
     FILE_UNKNOWN_ERROR,
     FILE_BUFFER_ALLOCATION_ERROR,
-} FileOpResultType;
+} FileOpResultT;
 
 typedef struct {
-    const int8_t* path;
+    CStringViewT path;
     DArrayT* files;
     DArrayT* directories;
-} FolderContentsType;
+} FolderContentsT;
+
+typedef struct {
+    const int8_t* a;
+} FileInfoT;
 
 /***********************************************************************************************************************
 Static functions implementation
@@ -93,9 +98,9 @@ Static functions implementation
  * @param buffer Read data from file
  * @return File Operation Result
  */
-inline static FileOpResultType file_read_binary( const int8_t* filename, size_t* filesize, uint8_t** buffer )
+inline static FileOpResultT file_read_binary( const int8_t* filename, size_t* filesize, uint8_t** buffer )
 {
-    FileOpResultType result = FILE_READ_SUCCESFULLY;
+    FileOpResultT result = FILE_READ_SUCCESFULLY;
     // start processing
     FILE* fileIn = fopen( filename, "rb" );// open input file (binary)
 
@@ -138,9 +143,9 @@ inline static FileOpResultType file_read_binary( const int8_t* filename, size_t*
  * @param buffer Read data from the file
  * @return File Operation Result
  */
-inline static FileOpResultType file_read_string( const int8_t* filename, size_t* filesize, uint8_t** buffer )
+inline static FileOpResultT file_read_string( const int8_t* filename, size_t* filesize, uint8_t** buffer )
 {
-    FileOpResultType result = FILE_READ_SUCCESFULLY;
+    FileOpResultT result = FILE_READ_SUCCESFULLY;
 
     // Open the input file in text mode
     FILE* fileIn = fopen( filename, "r" );// "r" for reading ASCII files
@@ -186,9 +191,9 @@ inline static FileOpResultType file_read_string( const int8_t* filename, size_t*
  * @param buffer String to write
  * @return File Operation Result
  */
-inline static FileOpResultType file_write_string( const int8_t* filename, const int8_t* buffer )
+inline static FileOpResultT file_write_string( const int8_t* filename, const int8_t* buffer )
 {
-    FileOpResultType result = FILE_WROTE_SUCCESFULLY;
+    FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
     // Open the output file in write mode ("w" for ASCII text files)
     FILE* fileOut = fopen( filename, "w" );
@@ -226,9 +231,9 @@ inline static FileOpResultType file_write_string( const int8_t* filename, const 
  * @param filesize Size of the buffer to write
  * @return File Operation Result
  */
-inline static FileOpResultType file_write_binary( const int8_t* filename, const uint8_t* buffer, size_t filesize )
+inline static FileOpResultT file_write_binary( const int8_t* filename, const uint8_t* buffer, size_t filesize )
 {
-    FileOpResultType result = FILE_WROTE_SUCCESFULLY;
+    FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
     // Open the output file in binary write mode ("wb" for binary files)
     FILE* fileOut = fopen( filename, "wb" );
@@ -263,13 +268,13 @@ inline static FileOpResultType file_write_binary( const int8_t* filename, const 
  * @brief frees all dynamic strings from folder content struct
  * @param contents 
  */
-inline static void free_folder_contents_struct( FolderContentsType* contents )
+inline static void free_folder_contents_struct( FolderContentsT* contents )
 {
     if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
-
     if ( NULL != contents->directories ) { DStrArray_Destroy( contents->directories ); }
 }
 
+inline static void get_file_info( const int8_t* path, FileInfoT* ) {}
 #ifdef _WIN32
 /**
  * @brief lists directory contents
@@ -277,8 +282,9 @@ inline static void free_folder_contents_struct( FolderContentsType* contents )
  * @param contents output list
  * @return TRUE if success otherwise FALSE
  */
-inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
+inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsT* contents )
 {
+    contents->path = string_view_create( dir );
     contents->files = DStrArray_Init();
     contents->directories = DStrArray_Init();
 
@@ -306,14 +312,14 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
             DStringT* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            DArray_PushStr( contents->directories, str );
+            DStrArray_Push( contents->directories, str );
         }
         else if ( ( FALSE == skip ) )
         {
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
             DStringT* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            DArray_PushStr( contents->files, str );
+            DStrArray_Push( contents->files, str );
         }
 
     } while ( FindNextFile( hFind, &fdFile ) );//Find the next file.
@@ -332,7 +338,7 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
  * @param contents output list
  * @return TRUE if success otherwise FALSE
  */
-inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsType* contents )
+inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsT* contents )
 {
     contents->files = DStrArray_Init();
     contents->directories = DStrArray_Init();
@@ -357,12 +363,12 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
 
             if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( FALSE == skip ) )
             {
-                DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
+                DStrArray_Push( contents->directories, DString_Create( namelist[ tempN ]->d_name,
                                                                        CString_Length( namelist[ tempN ]->d_name ) ) );
             }
             else if ( FALSE == skip )
             {
-                DArray_PushStr( contents->files, DString_Create( namelist[ tempN ]->d_name,
+                DStrArray_Push( contents->files, DString_Create( namelist[ tempN ]->d_name,
                                                                  CString_Length( namelist[ tempN ]->d_name ) ) );
             }
             CFREE( namelist[ tempN ], sizeof( struct dirent ) );
