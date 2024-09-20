@@ -98,40 +98,40 @@ Static functions implementation
  * @param buffer Read data from file
  * @return File Operation Result
  */
-inline static FileOpResultT file_read_binary( const int8_t* filename, size_t* filesize, uint8_t** buffer )
+inline static FileOpResultT file_read_binary(const int8_t* filename, size_t* filesize, uint8_t** buffer)
 {
     FileOpResultT result = FILE_READ_SUCCESFULLY;
     // start processing
-    FILE* fileIn = fopen( filename, "rb" );// open input file (binary)
+    FILE* fileIn = fopen(filename, "rb");// open input file (binary)
 
-    if ( fileIn == NULL )
+    if (fileIn == NULL)
     {
-        LOG_ERROR( "Can not open %s!\n", filename );
+        LOG_ERROR("Can not open %s!\n", filename);
         result = FILE_OPEN_ERROR;
     }
     else
     {
-        LOG_INFO( "Opened %s\n", filename );
+        LOG_INFO("Opened %s\n", filename);
         // obtain file size.
-        fseek( fileIn, 0, SEEK_END );
-        *filesize = ftell( fileIn );
-        rewind( fileIn );
-        LOG_INFO( "Filesize %d bytes.\n", *filesize );
+        fseek(fileIn, 0, SEEK_END);
+        *filesize = ftell(fileIn);
+        rewind(fileIn);
+        LOG_INFO("Filesize %d bytes.\n", *filesize);
 
         // allocate memory to contain the whole file.
-        *buffer = ( uint8_t* ) CMALLOC( *filesize );
-        if ( buffer == NULL )
+        *buffer = (uint8_t*) CMALLOC(*filesize);
+        if (buffer == NULL)
         {
-            LOG_ERROR( "Malloc for input file buffer failed(not enough memory?)\n" );
+            LOG_ERROR("Malloc for input file buffer failed(not enough memory?)\n");
             result = FILE_BUFFER_ALLOCATION_ERROR;
         }
         else
         {
             // copy the file into the buffer.
-            fread( buffer, 1, *filesize, fileIn );
+            fread(buffer, 1, *filesize, fileIn);
         }
 
-        fclose( fileIn );
+        fclose(fileIn);
     }
     return result;
 }
@@ -143,43 +143,43 @@ inline static FileOpResultT file_read_binary( const int8_t* filename, size_t* fi
  * @param buffer Read data from the file
  * @return File Operation Result
  */
-inline static FileOpResultT file_read_string( const int8_t* filename, size_t* filesize, uint8_t** buffer )
+inline static FileOpResultT file_read_string(const int8_t* filename, size_t* filesize, uint8_t** buffer)
 {
     FileOpResultT result = FILE_READ_SUCCESFULLY;
 
     // Open the input file in text mode
-    FILE* fileIn = fopen( filename, "r" );// "r" for reading ASCII files
+    FILE* fileIn = fopen(filename, "r");// "r" for reading ASCII files
 
-    if ( fileIn == NULL )
+    if (fileIn == NULL)
     {
-        LOG_ERROR( "Cannot open %s!\n", filename );
+        LOG_ERROR("Cannot open %s!\n", filename);
         result = FILE_OPEN_ERROR;
     }
     else
     {
-        LOG_INFO( "Opened %s\n", filename );
+        LOG_INFO("Opened %s\n", filename);
 
         // Obtain file size
-        fseek( fileIn, 0, SEEK_END );
-        *filesize = ftell( fileIn );
-        rewind( fileIn );
-        LOG_INFO( "Filesize %d bytes.\n", *filesize );
+        fseek(fileIn, 0, SEEK_END);
+        *filesize = ftell(fileIn);
+        rewind(fileIn);
+        LOG_INFO("Filesize %d bytes.\n", *filesize);
 
         // Allocate memory for the file content
-        *buffer = ( uint8_t* ) CMALLOC( *filesize + 1 );// Extra byte for null-terminator for text
-        if ( *buffer == NULL )
+        *buffer = (uint8_t*) CMALLOC(*filesize + 1);// Extra byte for null-terminator for text
+        if (*buffer == NULL)
         {
-            LOG_ERROR( "Memory allocation for input file buffer failed (not enough memory?)\n" );
+            LOG_ERROR("Memory allocation for input file buffer failed (not enough memory?)\n");
             result = FILE_BUFFER_ALLOCATION_ERROR;
         }
         else
         {
             // Read the file into the buffer
-            fread( *buffer, 1, *filesize, fileIn );
-            ( *buffer )[ *filesize ] = '\0';// Null-terminate for safe string handling
+            fread(*buffer, 1, *filesize, fileIn);
+            (*buffer)[*filesize] = '\0';// Null-terminate for safe string handling
         }
 
-        fclose( fileIn );
+        fclose(fileIn);
     }
 
     return result;
@@ -191,34 +191,34 @@ inline static FileOpResultT file_read_string( const int8_t* filename, size_t* fi
  * @param buffer String to write
  * @return File Operation Result
  */
-inline static FileOpResultT file_write_string( const int8_t* filename, const int8_t* buffer )
+inline static FileOpResultT file_write_string(const int8_t* filename, const int8_t* buffer)
 {
     FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
     // Open the output file in write mode ("w" for ASCII text files)
-    FILE* fileOut = fopen( filename, "w" );
+    FILE* fileOut = fopen(filename, "w");
 
-    if ( fileOut == NULL )
+    if (fileOut == NULL)
     {
-        LOG_ERROR( "Cannot open %s for writing!\n", filename );
+        LOG_ERROR("Cannot open %s for writing!\n", filename);
         result = FILE_OPEN_ERROR;
     }
     else
     {
-        LOG_INFO( "Writing to %s\n", filename );
+        LOG_INFO("Writing to %s\n", filename);
 
         // Write the buffer to the file
 
-        size_t written_size = fprintf( fileOut, buffer );
+        size_t written_size = fprintf(fileOut, buffer);
 
-        if ( written_size == 0 )
+        if (written_size == 0)
         {
-            LOG_ERROR( "Error writing to file %s!Wrote %d bytes.\n", filename, written_size );
+            LOG_ERROR("Error writing to file %s!Wrote %d bytes.\n", filename, written_size);
             result = FILE_WRITE_ERROR;
         }
-        else { LOG_INFO( "Successfully wrote %d bytes to %s.\n", written_size, filename ); }
+        else { LOG_INFO("Successfully wrote %d bytes to %s.\n", written_size, filename); }
 
-        fclose( fileOut );
+        fclose(fileOut);
     }
 
     return result;
@@ -231,34 +231,34 @@ inline static FileOpResultT file_write_string( const int8_t* filename, const int
  * @param filesize Size of the buffer to write
  * @return File Operation Result
  */
-inline static FileOpResultT file_write_binary( const int8_t* filename, const uint8_t* buffer, size_t filesize )
+inline static FileOpResultT file_write_binary(const int8_t* filename, const uint8_t* buffer, size_t filesize)
 {
     FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
     // Open the output file in binary write mode ("wb" for binary files)
-    FILE* fileOut = fopen( filename, "wb" );
+    FILE* fileOut = fopen(filename, "wb");
 
-    if ( fileOut == NULL )
+    if (fileOut == NULL)
     {
-        LOG_ERROR( "Cannot open %s for writing!\n", filename );
+        LOG_ERROR("Cannot open %s for writing!\n", filename);
         result = FILE_OPEN_ERROR;
     }
     else
     {
-        LOG_INFO( "Writing to %s\n", filename );
+        LOG_INFO("Writing to %s\n", filename);
 
         // Write the buffer to the file in binary mode
-        size_t written_size = fwrite( buffer, 1, filesize, fileOut );
+        size_t written_size = fwrite(buffer, 1, filesize, fileOut);
 
-        if ( written_size != filesize )
+        if (written_size != filesize)
         {
-            LOG_ERROR( "Error writing to file %s! Expected %d bytes, wrote %d bytes.\n", filename, filesize,
-                       written_size );
+            LOG_ERROR("Error writing to file %s! Expected %d bytes, wrote %d bytes.\n", filename, filesize,
+                      written_size);
             result = FILE_WRITE_ERROR;
         }
-        else { LOG_INFO( "Successfully wrote %d bytes to %s.\n", written_size, filename ); }
+        else { LOG_INFO("Successfully wrote %d bytes to %s.\n", written_size, filename); }
 
-        fclose( fileOut );
+        fclose(fileOut);
     }
 
     return result;
@@ -268,13 +268,13 @@ inline static FileOpResultT file_write_binary( const int8_t* filename, const uin
  * @brief frees all dynamic strings from folder content struct
  * @param contents 
  */
-inline static void free_folder_contents_struct( FolderContentsT* contents )
+inline static void free_folder_contents_struct(FolderContentsT* contents)
 {
-    if ( NULL != contents->files ) { DStrArray_Destroy( contents->files ); }
-    if ( NULL != contents->directories ) { DStrArray_Destroy( contents->directories ); }
+    if (NULL != contents->files) { str_arr_destroy(contents->files); }
+    if (NULL != contents->directories) { str_arr_destroy(contents->directories); }
 }
 
-inline static void get_file_info( const int8_t* path, FileInfoT* ) {}
+inline static void get_file_info(const int8_t* path, FileInfoT*) {}
 #ifdef _WIN32
 /**
  * @brief lists directory contents
@@ -282,49 +282,49 @@ inline static void get_file_info( const int8_t* path, FileInfoT* ) {}
  * @param contents output list
  * @return TRUE if success otherwise FALSE
  */
-inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsT* contents )
+inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* contents)
 {
-    contents->path = string_view_create( dir );
-    contents->files = DStrArray_Init();
-    contents->directories = DStrArray_Init();
+    contents->path = string_view_create(dir);
+    contents->files = str_arr_create();
+    contents->directories = str_arr_create();
 
     WIN32_FIND_DATA fdFile;
     HANDLE hFind = NULL;
 
-    int8_t sPath[ MAX_PATH_SIZE ];
+    int8_t sPath[MAX_PATH_SIZE];
 
     //Specify a file mask. *.*
-    sprintf( sPath, "%s\\*.*", dir );
+    sprintf(sPath, "%s\\*.*", dir);
 
-    if ( ( hFind = FindFirstFile( sPath, &fdFile ) ) == INVALID_HANDLE_VALUE )
+    if ((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
     {
-        LOG_ERROR( "Path not found: [%s]\n", dir );
+        LOG_ERROR("Path not found: [%s]\n", dir);
         return FALSE;
     }
 
     do {
         BOOL skip = FALSE;
         //skip path/. and path/..
-        if ( fdFile.cFileName[ 0 ] == '.' ) { skip = TRUE; }
+        if (fdFile.cFileName[0] == '.') { skip = TRUE; }
 
-        if ( ( FALSE == skip ) && ( fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ) )
+        if ((FALSE == skip) && (fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
         {
-            sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
+            sprintf(sPath, "%s\\%s", dir, fdFile.cFileName);
 
-            DStringT* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            DStrArray_Push( contents->directories, str );
+            DStringT* str = str_create(&sPath[0], strlen(sPath));
+            str_arr_push_back(contents->directories, str);
         }
-        else if ( ( FALSE == skip ) )
+        else if ((FALSE == skip))
         {
-            sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
+            sprintf(sPath, "%s\\%s", dir, fdFile.cFileName);
 
-            DStringT* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            DStrArray_Push( contents->files, str );
+            DStringT* str = str_create(&sPath[0], strlen(sPath));
+            str_arr_push_back(contents->files, str);
         }
 
-    } while ( FindNextFile( hFind, &fdFile ) );//Find the next file.
+    } while (FindNextFile(hFind, &fdFile));//Find the next file.
 
-    FindClose( hFind );
+    FindClose(hFind);
 
     return TRUE;
 }
@@ -338,7 +338,7 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsT* 
  * @param contents output list
  * @return TRUE if success otherwise FALSE
  */
-inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsT* contents )
+inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* contents)
 {
     contents->files = DStrArray_Init();
     contents->directories = DStrArray_Init();
@@ -346,34 +346,34 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsT* 
     struct dirent** namelist;
     int32_t n;
 
-    n = scandir( dir, &namelist, NULL, alphasort );
-    if ( n < 0 )
+    n = scandir(dir, &namelist, NULL, alphasort);
+    if (n < 0)
     {
-        LOG_ERROR( "Scanning dir %s\nError: %s", dir, strerror( errno ) );
+        LOG_ERROR("Scanning dir %s\nError: %s", dir, strerror(errno));
         return FALSE;
     }
     else
     {
         int32_t tempN = n;
-        while ( tempN-- )
+        while (tempN--)
         {
             BOOL skip = FALSE;
 
-            if ( namelist[ tempN ]->d_name[ 0 ] == '.' ) { skip = TRUE; }
+            if (namelist[tempN]->d_name[0] == '.') { skip = TRUE; }
 
-            if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( FALSE == skip ) )
+            if ((namelist[tempN]->d_type == DT_DIR) && (FALSE == skip))
             {
-                DStrArray_Push( contents->directories, DString_Create( namelist[ tempN ]->d_name,
-                                                                       CString_Length( namelist[ tempN ]->d_name ) ) );
+                str_arr_push_back(contents->directories,
+                                  DString_Create(namelist[tempN]->d_name, CString_Length(namelist[tempN]->d_name)));
             }
-            else if ( FALSE == skip )
+            else if (FALSE == skip)
             {
-                DStrArray_Push( contents->files, DString_Create( namelist[ tempN ]->d_name,
-                                                                 CString_Length( namelist[ tempN ]->d_name ) ) );
+                str_arr_push_back(contents->files,
+                                  DString_Create(namelist[tempN]->d_name, CString_Length(namelist[tempN]->d_name)));
             }
-            CFREE( namelist[ tempN ], sizeof( struct dirent ) );
+            CFREE(namelist[tempN], sizeof(struct dirent));
         }
-        CFREE( namelist, n );
+        CFREE(namelist, n);
     }
     return TRUE;
 }
