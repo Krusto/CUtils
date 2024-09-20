@@ -75,7 +75,7 @@ static void arr_insert_u16(DArrayT* arr, size_t index, uint16_t value);
 static void arr_insert_i16(DArrayT* arr, size_t index, int16_t value);
 static void arr_insert_u8(DArrayT* arr, size_t index, uint8_t value);
 static void arr_insert_i8(DArrayT* arr, size_t index, int8_t value);
-static void arr_resize(DArrayT* buf, size_t newLength);
+static void arr_resize(DArrayT* arr, size_t newLength);
 static void* arr_get_ptr(DArrayT* arr, size_t index);
 static uint32_t arr_get_u32(DArrayT* arr, size_t index);
 static int32_t arr_get_i32(DArrayT* arr, size_t index);
@@ -98,17 +98,17 @@ static void arr_push_i16(DArrayT* arr, int16_t value);
 static void arr_push_u8(DArrayT* arr, uint8_t value);
 static void arr_push_i8(DArrayT* arr, int8_t value);
 static void arr_push_generic(DArrayT* arr, void* value);
-static BOOL arr_is_empty(DArrayT* buf);
-static size_t arr_length(DArrayT* buf);
-static size_t arr_capacity(DArrayT* buf);
-static void arr_resize(DArrayT* buf, size_t newLength);
-static void arr_destroy(DArrayT* buf);
+static BOOL arr_is_empty(DArrayT* arr);
+static size_t arr_length(DArrayT* arr);
+static size_t arr_capacity(DArrayT* arr);
+static void arr_resize(DArrayT* arr, size_t newLength);
+static void arr_destroy(DArrayT* arr);
 static void* arr_create(size_t stride);
-static void arr_erase(DArrayT* buf, size_t index);
-static void arr_insert(DArrayT* buf, uint32_t index, void* element);
-static void arr_shrink_to_fit(DArrayT* buf);
-static void arr_reserve(DArrayT* buf, size_t newCapacity);
-static void* arr_pop(DArrayT* buf);
+static void arr_erase(DArrayT* arr, size_t index);
+static void arr_insert(DArrayT* arr, uint32_t index, void* element);
+static void arr_shrink_to_fit(DArrayT* arr);
+static void arr_reserve(DArrayT* arr, size_t newCapacity);
+static void* arr_pop(DArrayT* arr);
 
 /***********************************************************************************************************************
 Static functions implementation
