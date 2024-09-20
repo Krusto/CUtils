@@ -305,14 +305,14 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
         {
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
-            int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
+            DStringT* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
             DArray_PushStr( contents->directories, str );
         }
         else if ( ( FALSE == skip ) )
         {
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
-            int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
+            DStringT* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
             DArray_PushStr( contents->files, str );
         }
 

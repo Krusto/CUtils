@@ -97,10 +97,9 @@ Macro Definitions
 
 #define DArray_PushStr( arr, ptr )                                                                                     \
     DArray_Resize( ( DArrayT* ) arr, DArray_Length( ( DArrayT* ) arr ) + 1 );                                          \
-    ( ( int8_t** ) DArray_Data( arr ) )[ ( DArray_Length( arr ) - 1 ) ] = ptr;
+    ( ( DStringT** ) DArray_Data( arr ) )[ ( DArray_Length( arr ) - 1 ) ] = ptr;
 
-#define DArray_GetStr( arr, index )                                                                                    \
-    ( ( DStringT* ) ( ( ( int8_t** ) ( ( ( DArrayT* ) arr )->data ) )[ ( index ) ] ) )->data
+#define DArray_GetStr( arr, index ) ( ( DStringT** ) ( ( ( DArrayT* ) arr )->data ) )[ index ]
 
 #define DStrArray_Destroy( arr ) str_arr_destroy( ( DArrayT* ) arr )
 
@@ -329,7 +328,11 @@ inline static void str_arr_destroy( DArrayT* buf )
 {
     if ( NULL != buf )
     {
-        for ( size_t i = 0; i < DArray_Length( buf ); i++ ) { DString_Destroy( DArray_GetStr( buf, i ) ); }
+        for ( size_t i = 0; i < DArray_Length( buf ); i++ )
+        {
+            DStringT* str = DArray_GetStr( buf, i );
+            str_destroy( str );
+        }
         if ( buf->data ) { CFREE( buf->data, buf->length ); }
         CFREE( ( void* ) buf, DARRAY_HEADER_SIZE + sizeof( int8_t* ) );
     }

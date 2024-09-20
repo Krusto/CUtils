@@ -40,8 +40,16 @@ int main( void )
     FolderContentsType f;
     list_directory_contents( "C:/Users", &f );
 
-    for ( size_t i = 0; i < f.files->length; i++ ) { printf( "FILE: %s\n", DArray_GetStr( f.files, i ) ); }
-    for ( size_t i = 0; i < f.directories->length; i++ ) { printf( "DIRR: %s\n", DArray_GetStr( f.directories, i ) ); }
+    for ( size_t i = 0; i < f.files->length; i++ )
+    {
+        const char* str = DArray_GetStr( f.files, i )->data;
+        printf( "FILE: %s\n", str );
+    }
+    for ( size_t i = 0; i < f.directories->length; i++ )
+    {
+        const char* str = DArray_GetStr( f.directories, i )->data;
+        printf( "DIRR: %s\n", str );
+    }
 
     free_folder_contents_struct( &f );
     return 0;
