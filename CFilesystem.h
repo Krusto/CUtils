@@ -358,12 +358,12 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
             if ( ( namelist[ tempN ]->d_type == DT_DIR ) && ( FALSE == skip ) )
             {
                 DArray_PushStr( contents->directories, DString_Create( namelist[ tempN ]->d_name,
-                                                                       DString_Length( namelist[ tempN ]->d_name ) ) );
+                                                                       CString_Length( namelist[ tempN ]->d_name ) ) );
             }
             else if ( FALSE == skip )
             {
                 DArray_PushStr( contents->files, DString_Create( namelist[ tempN ]->d_name,
-                                                                 DString_Length( namelist[ tempN ]->d_name ) ) );
+                                                                 CString_Length( namelist[ tempN ]->d_name ) ) );
             }
             CFREE( namelist[ tempN ], sizeof( struct dirent ) );
         }

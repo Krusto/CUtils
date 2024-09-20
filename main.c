@@ -30,16 +30,18 @@ int main( void )
 
     DArray_Destroy( myArray );
 
-
     const char* example = "example string";
 
-    DStringT* str = DString_Create( example, strlen( example ) );
-    for ( size_t i = 0; i < DString_Length( str ); i++ ) { printf( "%c", DString_Get( str, i ) ); }
+    DStringT* str = DString_Create( example, CString_Length( example ) );
+    for ( size_t i = 0; i < strlen( str->data ); i++ ) { printf( "%c", DString_Get( str, i ) ); }
     DString_Destroy( str );
     LOG( "\n\n\n" );
 
     FolderContentsType f;
-    list_directory_contents( "../../", &f );
+    list_directory_contents( "C:/Users", &f );
+
+    for ( size_t i = 0; i < f.files->length; i++ ) { printf( "FILE: %s\n", DArray_GetStr( f.files, i ) ); }
+    for ( size_t i = 0; i < f.directories->length; i++ ) { printf( "DIRR: %s\n", DArray_GetStr( f.directories, i ) ); }
 
     free_folder_contents_struct( &f );
     return 0;
