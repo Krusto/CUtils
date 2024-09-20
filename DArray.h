@@ -126,7 +126,7 @@ inline static void arr_insert_generic(DArrayT* arr, size_t index, void* valuePtr
             void* next = (void*) &arr->data[index * arr->elementSize + arr->elementSize];
             void* current = &arr->data[index * arr->elementSize];
             resultPtr = CMEMCPY(next, current, len * arr->elementSize);
-            if (NULL != resultPtr) { CMEMCPY(&arr[index], valuePtr, arr->elementSize); }
+            if (NULL != resultPtr) { CMEMCPY(&arr->data[index * arr->elementSize], valuePtr, arr->elementSize); }
         }
     }
 }
@@ -194,7 +194,7 @@ inline static void arr_push_i8(DArrayT* arr, int8_t value) { arr_push_generic(ar
 inline static void arr_push_generic(DArrayT* arr, void* value)
 {
     arr_resize(arr, arr->length + 1);
-    CMEMCPY(&arr->data[arr->length - 1], &value, arr->elementSize);
+    CMEMCPY(&arr->data[arr->length * arr->elementSize - arr->elementSize], value, arr->elementSize);
 }
 
 inline static BOOL arr_is_empty(DArrayT* arr) { return (0u == arr->length); }
