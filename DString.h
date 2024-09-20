@@ -334,5 +334,58 @@ inline static void str_arr_destroy( DArrayT* buf )
     }
 }
 
-inline static void str_append_cstring( DStringT* str, const int8_t* cstr ) {}
+inline static DStringT* dstring_append_cstring( DStringT* str, const int8_t* cstr )
+{
+
+    size_t old_length = str->length;
+    size_t cstr_length = CString_Length( cstr );
+    DString_Resize( str, str->length + cstr_length + DSTRING_NULL_TERMINATION_LENGTH );
+
+    DStringT* resultData = CMEMCPY( &str->data[ old_length ], cstr, cstr_length );
+    if ( NULL == resultData ) { LOG_ERROR( "Can not resize string!\n" ); }
+    else
+    {
+        resultData = str;
+        str->data[ str->length - 1 ] = '\0';
+        str->length -= DSTRING_NULL_TERMINATION_LENGTH;
+    }
+
+    return resultData;
+}
+
+inline static DStringT* dstring_append_dstring( DStringT* str, DStringT* another )
+{
+    size_t destPtrIndex = str->length;
+    size_t insertDataLength = another->length;
+    DString_Resize( str, destPtrIndex + insertDataLength + DSTRING_NULL_TERMINATION_LENGTH );
+
+    int8_t* resultData = CMEMCPY( &str->data[ destPtrIndex ], another->data, insertDataLength );
+    if ( NULL != resultData )
+    {
+        resultData = str;
+        str->data[ str->length - 1 ] = '\0';
+        str->length -= DSTRING_NULL_TERMINATION_LENGTH;
+    }
+    else { LOG_ERROR( "Can not append string!\n" ); }
+
+    return resultData;
+}
+
+inline static DStringT* dstring_insert_dstring( DStringT* str, DStringT* another, size_t index )
+{
+    size_t oldLength = str->length;
+    DString_Resize( str, str->length + another->length + DSTRING_NULL_TERMINATION_LENGTH );
+
+    int8_t* resultData = CMEMCPY( &str->data[ index + another->length ], &str->data[ index ], oldLength - index );
+    if ( NULL != resultData ) { resultData = CMEMCPY( &str->data[ index ], another->data, another->length ); }
+    if ( NULL != resultData )
+    {
+        resultData = str;
+        str->data[ str->length - 1 ] = '\0';           // add null termination after the end of string
+        str->length -= DSTRING_NULL_TERMINATION_LENGTH;// fix string length (null termination doesn't count in strlen())
+    }
+    else { LOG_ERROR( "Can not insert string string!\n" ); }
+
+    return resultData;
+}
 #endif// DSTRING_HEADER

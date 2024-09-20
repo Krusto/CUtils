@@ -69,5 +69,13 @@ int main( void )
     LOG_INFO( "length : %zu\n", helloStr->length );
 
     DString_Destroy( helloStr );
+    DString_Destroy( worldStr );
+
+    helloStr = DString_Create( "amplr", 5 );
+    worldStr = DString_Create( "ex", 2 );
+
+    dstring_insert_dstring( helloStr, worldStr, 0 );
+    LOG_INFO( "result : %s\n", helloStr->data );
+
     return 0;
 }
