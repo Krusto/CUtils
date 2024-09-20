@@ -71,11 +71,18 @@ int main( void )
     DString_Destroy( helloStr );
     DString_Destroy( worldStr );
 
-    helloStr = DString_Create( "amplr", 5 );
+    helloStr = DString_Create( "ampl", 5 );
     worldStr = DString_Create( "ex", 2 );
+    DStringT* eStr = DString_Create( "e", 1 );
+    DStringT* mStr = DString_Create( "m", 1 );
 
     dstring_insert_dstring( helloStr, worldStr, 0 );
+    dstring_insert_dstring( helloStr, eStr, 6 );
+    dstring_insert_dstring( helloStr, mStr, 3 );
     LOG_INFO( "result : %s\n", helloStr->data );
-
+    DString_Destroy( helloStr );
+    DString_Destroy( worldStr );
+    DString_Destroy( eStr );
+    DString_Destroy( mStr );
     return 0;
 }
