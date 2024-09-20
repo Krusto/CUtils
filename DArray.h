@@ -197,40 +197,40 @@ inline static void arr_push_generic(DArrayT* arr, void* value)
     CMEMCPY(&arr->data[arr->length - 1], &value, arr->elementSize);
 }
 
-inline static BOOL arr_is_empty(DArrayT* buf) { return (0u == buf->length); }
+inline static BOOL arr_is_empty(DArrayT* arr) { return (0u == arr->length); }
 
-inline static size_t arr_length(DArrayT* buf) { return buf->length; }
+inline static size_t arr_length(DArrayT* arr) { return arr->length; }
 
-inline static size_t arr_capacity(DArrayT* buf) { return buf->capacity; }
+inline static size_t arr_capacity(DArrayT* arr) { return arr->capacity; }
 
-inline static void arr_resize(DArrayT* buf, size_t newLength)
+inline static void arr_resize(DArrayT* arr, size_t newLength)
 {
-    if (newLength > buf->length)
+    if (newLength > arr->length)
     {
-        if (newLength > buf->capacity)
+        if (newLength > arr->capacity)
         {
             void* resultPtr;
             size_t newCapacity = newLength * DARRAY_RESIZE_FACTOR;
 
-            if (NULL == buf->data) { resultPtr = CMALLOC(newCapacity * (buf->elementSize)); }
-            else { resultPtr = CREALLOC(buf->data, newCapacity * (buf->elementSize)); }
+            if (NULL == arr->data) { resultPtr = CMALLOC(newCapacity * (arr->elementSize)); }
+            else { resultPtr = CREALLOC(arr->data, newCapacity * (arr->elementSize)); }
             if (NULL == resultPtr) { LOG_ERROR("Can not allocate dynamic array!\n"); }
             if (NULL != resultPtr)
             {
-                buf->data = resultPtr;
-                buf->length = newLength;
-                buf->capacity = newCapacity;
+                arr->data = resultPtr;
+                arr->length = newLength;
+                arr->capacity = newCapacity;
             }
         }
-        else { buf->length = newLength; }
+        else { arr->length = newLength; }
     }
-    else { buf->length = newLength; }
+    else { arr->length = newLength; }
 }
 
-inline static void arr_destroy(DArrayT* buf)
+inline static void arr_destroy(DArrayT* arr)
 {
-    CFREE(buf->data, buf->length);
-    CFREE(buf, sizeof(buf));
+    CFREE(arr->data, arr->length);
+    CFREE(arr, sizeof(arr));
 }
 
 inline static void* arr_create(size_t stride)
@@ -247,80 +247,80 @@ inline static void* arr_create(size_t stride)
         result->elementSize = stride;              // set element size to stride
     }
     uint8_t* dataPtr = (uint8_t*) CMALLOC(stride);
-    if (NULL == result) { LOG_ERROR("Can not allocate array buffer!\n"); }
+    if (NULL == result) { LOG_ERROR("Can not allocate array arrfer!\n"); }
     else { result->data = dataPtr; }
 
     return (void*) result;
 }
 
-inline static void arr_erase(DArrayT* buf, size_t index)
+inline static void arr_erase(DArrayT* arr, size_t index)
 {
-    if (index < buf->length)
+    if (index < arr->length)
     {
         void* resultPtr = NULL;
-        if (NULL != buf->data)
+        if (NULL != arr->data)
         {
-            void* dest = &(buf->data[index]);
-            void* src = &(buf->data[index + buf->elementSize]);
-            resultPtr = CMEMCPY(dest, src, (buf->length - index));
-            if (NULL == resultPtr) { LOG_ERROR("Can not copy array buffer!\n"); }
+            void* dest = &(arr->data[index]);
+            void* src = &(arr->data[index + arr->elementSize]);
+            resultPtr = CMEMCPY(dest, src, (arr->length - index));
+            if (NULL == resultPtr) { LOG_ERROR("Can not copy array arrfer!\n"); }
         }
-        if (NULL != resultPtr) { buf->length -= 1; }
+        if (NULL != resultPtr) { arr->length -= 1; }
     }
 }
 
-inline static void arr_insert(DArrayT* buf, uint32_t index, void* element)
+inline static void arr_insert(DArrayT* arr, uint32_t index, void* element)
 {
-    void* src = &(buf->data[index]);
-    void* dest = &(buf->data[index + buf->elementSize]);
+    void* src = &(arr->data[index]);
+    void* dest = &(arr->data[index + arr->elementSize]);
     void* resultPtr = NULL;
 
-    resultPtr = CMEMCPY(dest, src, (buf->length - index - 1));
+    resultPtr = CMEMCPY(dest, src, (arr->length - index - 1));
 
-    if (NULL == resultPtr) { LOG_ERROR("Can not copy array buffer!\n"); }
-    if (NULL != resultPtr) { resultPtr = CMEMCPY(src, element, buf->elementSize); }
+    if (NULL == resultPtr) { LOG_ERROR("Can not copy array arrfer!\n"); }
+    if (NULL != resultPtr) { resultPtr = CMEMCPY(src, element, arr->elementSize); }
 }
 
-inline static void arr_shrink_to_fit(DArrayT* buf)
+inline static void arr_shrink_to_fit(DArrayT* arr)
 {
-    if (buf->capacity > buf->length)
+    if (arr->capacity > arr->length)
     {
         void* resultPtr = NULL;
-        if (NULL != buf->data) { resultPtr = CREALLOC(buf->data, buf->length * buf->elementSize); }
-        if (NULL == resultPtr) { LOG_ERROR("Can not reallocate array buffer!\n"); }
+        if (NULL != arr->data) { resultPtr = CREALLOC(arr->data, arr->length * arr->elementSize); }
+        if (NULL == resultPtr) { LOG_ERROR("Can not reallocate array arrfer!\n"); }
         if (NULL != resultPtr)
         {
-            buf->capacity = buf->length;
-            buf->data = resultPtr;
+            arr->capacity = arr->length;
+            arr->data = resultPtr;
         }
     }
 }
 
-inline static void arr_reserve(DArrayT* buf, size_t newCapacity)
+inline static void arr_reserve(DArrayT* arr, size_t newCapacity)
 {
-    if (newCapacity > buf->capacity)
+    if (newCapacity > arr->capacity)
     {
         void* resultPtr;
 
-        if (NULL == buf->data) { resultPtr = CMALLOC(newCapacity * buf->elementSize); }
-        else { resultPtr = CREALLOC(buf->data, newCapacity * buf->elementSize); }
+        if (NULL == arr->data) { resultPtr = CMALLOC(newCapacity * arr->elementSize); }
+        else { resultPtr = CREALLOC(arr->data, newCapacity * arr->elementSize); }
 
-        if (NULL == resultPtr) { LOG_ERROR("Can not allocate array buffer!\n"); }
+        if (NULL == resultPtr) { LOG_ERROR("Can not allocate array arrfer!\n"); }
         if (NULL != resultPtr)
         {
-            buf->data = resultPtr;
-            buf->capacity = newCapacity;
+            arr->data = resultPtr;
+            arr->capacity = newCapacity;
         }
     }
 }
 
-inline static void* arr_pop(DArrayT* buf)
+inline static void* arr_pop(DArrayT* arr)
 {
     void* valuePtr = NULL;
-    if (buf->length > 0)
+    if (arr->length > 0)
     {
-        valuePtr = arr_back_ptr(buf);
-        buf->length -= 1;
+        valuePtr = arr_back_ptr(arr);
+        arr->length -= 1;
     }
     else { LOG_ERROR("Can not pop from array with size < 0!\n"); }
     return valuePtr;

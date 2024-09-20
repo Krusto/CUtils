@@ -84,7 +84,7 @@ typedef struct {
 } FolderContentsT;
 
 typedef struct {
-    const int8_t* a;
+    CStringViewT a;
 } FileInfoT;
 
 /***********************************************************************************************************************
@@ -275,6 +275,7 @@ inline static void free_folder_contents_struct(FolderContentsT* contents)
 }
 
 inline static void get_file_info(const int8_t* path, FileInfoT*) {}
+
 #ifdef _WIN32
 /**
  * @brief lists directory contents
