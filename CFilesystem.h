@@ -73,13 +73,13 @@ typedef enum
     FILE_OPEN_ERROR,
     FILE_NOT_FOUND_ERROR,
     FILE_UNKNOWN_ERROR,
-    FILE_BUFFER_ALLOCATION_ERROR
+    FILE_BUFFER_ALLOCATION_ERROR,
 } FileOpResultType;
 
 typedef struct {
     const int8_t* path;
-    _DArrayType* files;
-    _DArrayType* directories;
+    DArrayT* files;
+    DArrayT* directories;
 } FolderContentsType;
 
 /***********************************************************************************************************************
@@ -297,7 +297,6 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
     }
 
     do {
-
         BOOL skip = FALSE;
         //skip path/. and path/..
         if ( fdFile.cFileName[ 0 ] == '.' ) { skip = TRUE; }
@@ -307,8 +306,6 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
             int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            printf( "%s %zu\n", fdFile.cFileName, strlen( str ) + 1 );
-
             DArray_PushStr( contents->directories, str );
         }
         else if ( ( FALSE == skip ) )
@@ -316,7 +313,6 @@ inline static BOOL list_directory_contents( const int8_t* dir, FolderContentsTyp
             sprintf( sPath, "%s\\%s", dir, fdFile.cFileName );
 
             int8_t* str = DString_Create( &sPath[ 0 ], strlen( sPath ) );
-            printf( "%s %zu\n", fdFile.cFileName, strlen( str ) + 1 );
             DArray_PushStr( contents->files, str );
         }
 
