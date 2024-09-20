@@ -364,13 +364,13 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
 
             if ((namelist[tempN]->d_type == DT_DIR) && (FALSE == skip))
             {
-                str_arr_push_back(contents->directories,
-                                  DString_Create(namelist[tempN]->d_name, CString_Length(namelist[tempN]->d_name)));
+                DStringT* str = str_create(&namelist[tempN]->d_name, strlen(namelist[tempN]->d_name));
+                str_arr_push_back(contents->directories, str);
             }
             else if (FALSE == skip)
             {
-                str_arr_push_back(contents->files,
-                                  DString_Create(namelist[tempN]->d_name, CString_Length(namelist[tempN]->d_name)));
+                DStringT* str = str_create(&namelist[tempN]->d_name, strlen(namelist[tempN]->d_name));
+                str_arr_push_back(contents->files, str);
             }
             CFREE(namelist[tempN], sizeof(struct dirent));
         }
