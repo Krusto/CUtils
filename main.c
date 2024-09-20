@@ -6,14 +6,14 @@
 
 int main(void)
 {
-    DArrayT* myArray = DArray_Create(uint32_t);
+    DArrayT* myArray = arr_create(sizeof(uint32_t));
 
-    DArray_Push(myArray, 0xFF000000);
-    DArray_Push(myArray, 0xFFFF0000);
-    DArray_Push(myArray, 0xFFFFFF00);
-    DArray_Push(myArray, 0xFFFFFFFF);
-    DArray_Push(myArray, 0xF0F0F0F0);
-    DArray_Push(myArray, 0x1F0F0F0F);
+    arr_push_u32(myArray, 0xFF000000);
+    arr_push_u32(myArray, 0xFFFF0000);
+    arr_push_u32(myArray, 0xFFFFFF00);
+    arr_push_u32(myArray, 0xFFFFFFFF);
+    arr_push_u32(myArray, 0xF0F0F0F0);
+    arr_push_u32(myArray, 0x1F0F0F0F);
     printf("Capacity: %d\n", arr_capacity(myArray));
     arr_shrink_to_fit(myArray);
     printf("Capacity: %d\n", arr_capacity(myArray));
@@ -21,8 +21,9 @@ int main(void)
     for (size_t i = 0; i < arr_length(myArray); i++) { printf("%X ", arr_get_u32(myArray, i)); }
     printf("\n");
 
-    DArray_Insert(myArray, 0, 10);
-    DArray_Insert(myArray, 1, 30);
+    arr_insert_u32(myArray, 0, 10);
+    arr_insert_u32(myArray, 1, 30);
+
     printf("Capacity: %d\n", arr_capacity(myArray));
 
     uint32_t len = arr_length(myArray);
