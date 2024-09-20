@@ -328,11 +328,7 @@ inline static void str_arr_destroy( DArrayT* buf )
 {
     if ( NULL != buf )
     {
-        for ( size_t i = 0; i < DArray_Length( buf ); i++ )
-        {
-            DStringT* str = DArray_GetStr( buf, i );
-            str_destroy( str );
-        }
+        for ( size_t i = 0; i < DArray_Length( buf ); i++ ) { DString_Destroy( DArray_GetStr( buf, i ) ); }
         if ( buf->data ) { CFREE( buf->data, buf->length ); }
         CFREE( ( void* ) buf, DARRAY_HEADER_SIZE + sizeof( int8_t* ) );
     }
