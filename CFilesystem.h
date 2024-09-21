@@ -331,7 +331,7 @@ inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInf
         int32_t statResult = stat(absolute_path, &fileStat);
         if (statResult == 0)
         {
-            CFREE(absolute_path,cstr_length(absolute_path));
+            CFREE(absolute_path, cstr_length(absolute_path));
             fileInfoPtr->path.data = path;
             fileInfoPtr->path.length = cstr_length(path);
             if (sizeof(fileStat.st_size) > 4u)
@@ -424,7 +424,7 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
 #else
 
 #include <errno.h>
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
 
 /**
  * @brief lists directory contents
@@ -445,10 +445,7 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
     char* absolute_path = realpath(dir, NULL);
 
     n = scandir(absolute_path, &namelist, NULL, alphasort);
-    if (n < 0)
-    {
-        LOG_ERROR("Scanning dir %s\nError: %s\n", absolute_path, strerror(errno));
-    }
+    if (n < 0) { LOG_ERROR("Scanning dir %s\nError: %s\n", absolute_path, strerror(errno)); }
     else
     {
         int32_t tempN = n;
@@ -473,7 +470,7 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
         CFREE(namelist, n);
         result = TRUE;
     }
-    CFREE(absolute_path,cstr_length(absolute_path));
+    CFREE(absolute_path, cstr_length(absolute_path));
     return result;
 }
 #endif
