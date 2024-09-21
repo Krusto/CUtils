@@ -73,7 +73,9 @@ typedef enum
     FILE_WRITE_ERROR,
     FILE_OPEN_ERROR,
     FILE_NOT_FOUND_ERROR,
+    FILE_DOES_NOT_EXIST,
     FILE_UNKNOWN_ERROR,
+    FILE_OPERATION_SUCCESS,
     FILE_BUFFER_ALLOCATION_ERROR,
 } FileOpResultT;
 
@@ -84,7 +86,12 @@ typedef struct {
 } FolderContentsT;
 
 typedef struct {
-    CStringViewT a;
+    CStringViewT path;
+    uint32_t fileAttributes;
+    size_t fileSize[2];
+    size_t lastWriteTime[2];
+    size_t lastAccessTime[2];
+    size_t creationTime[2];
 } FileInfoT;
 
 /***********************************************************************************************************************
@@ -274,7 +281,45 @@ inline static void free_folder_contents_struct(FolderContentsT* contents)
     if (NULL != contents->directories) { str_arr_destroy(contents->directories); }
 }
 
-inline static void get_file_info(const int8_t* path, FileInfoT*) {}
+inline static BOOL file_exists(const int8_t* path)
+{
+    FILE* filePtr = fopen(path, "r");
+    BOOL result = FALSE;
+    if (NULL != filePtr)
+    {
+        result = TRUE;
+        fclose(filePtr);
+    }
+    return result;
+}
+
+inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInfoPtr)
+{
+    BOOL fileExists = file_exists(path);
+    FileOpResultT result = FILE_DOES_NOT_EXIST;
+    if (TRUE == fileExists)
+    {
+        result = FILE_OPERATION_SUCCESS;
+#ifdef _WIN32
+        WIN32_FILE_ATTRIBUTE_DATA fInfo;
+        GetFileAttributesEx(path, GetFileExInfoStandard, &fInfo);
+        fileInfoPtr->path.data = path;
+        fileInfoPtr->path.length = cstr_length(path);
+        fileInfoPtr->fileAttributes = fInfo.dwFileAttributes;
+        fileInfoPtr->fileSize[0] = fInfo.nFileSizeLow;
+        fileInfoPtr->fileSize[1] = fInfo.nFileSizeHigh;
+        fileInfoPtr->creationTime[0] = fInfo.ftCreationTime.dwLowDateTime;
+        fileInfoPtr->creationTime[1] = fInfo.ftCreationTime.dwHighDateTime;
+        fileInfoPtr->lastAccessTime[0] = fInfo.ftLastAccessTime.dwLowDateTime;
+        fileInfoPtr->lastAccessTime[1] = fInfo.ftLastAccessTime.dwHighDateTime;
+        fileInfoPtr->lastWriteTime[0] = fInfo.ftLastWriteTime.dwLowDateTime;
+        fileInfoPtr->lastWriteTime[1] = fInfo.ftLastWriteTime.dwHighDateTime;
+#else
+#endif
+    }
+    else { LOG_ERROR("File %s does not exit!\n", path); }
+    return result;
+}
 
 #ifdef _WIN32
 /**

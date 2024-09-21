@@ -85,5 +85,13 @@ int main(void)
     str_destroy(worldStr);
     str_destroy(eStr);
     str_destroy(mStr);
+
+    FileInfoT fileInfo;
+    FileOpResultT fileOpResult = get_file_info("../main.c", &fileInfo);
+    if (FILE_OPERATION_SUCCESS == fileOpResult)
+    {
+        printf("path: %s\n", fileInfo.path.data);
+        printf("size: %d %d\n", fileInfo.fileSize[0], fileInfo.fileSize[1]);
+    }
     return 0;
 }
