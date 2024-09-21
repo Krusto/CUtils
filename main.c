@@ -6,30 +6,30 @@
 
 int main(void)
 {
-    DArrayT* myArray = arr_create_u32();
+    DArrayT* myArray = darr_create_u32();
 
-    arr_push_u32(myArray, 0xFF000000);
-    arr_push_u32(myArray, 0xFFFF0000);
-    arr_push_u32(myArray, 0xFFFFFF00);
-    arr_push_u32(myArray, 0xFFFFFFFF);
-    arr_push_u32(myArray, 0xF0F0F0F0);
-    arr_push_u32(myArray, 0x1F0F0F0F) ;
-    printf("Capacity: %d\n", arr_capacity(myArray));
-    arr_shrink_to_fit(myArray);
-    printf("Capacity: %d\n", arr_capacity(myArray));
+    darr_push_u32(myArray, 0xFF000000);
+    darr_push_u32(myArray, 0xFFFF0000);
+    darr_push_u32(myArray, 0xFFFFFF00);
+    darr_push_u32(myArray, 0xFFFFFFFF);
+    darr_push_u32(myArray, 0xF0F0F0F0);
+    darr_push_u32(myArray, 0x1F0F0F0F);
+    printf("Capacity: %d\n", darr_capacity(myArray));
+    darr_shrink_to_fit(myArray);
+    printf("Capacity: %d\n", darr_capacity(myArray));
 
-    for (size_t i = 0; i < arr_length(myArray); i++) { printf("%X ", arr_get_u32(myArray, i)); }
+    for (size_t i = 0; i < darr_length(myArray); i++) { printf("%X ", darr_get_u32(myArray, i)); }
     printf("\n");
 
-    arr_insert_u32(myArray, 0, 10);
-    arr_insert_u32(myArray, 1, 30);
+    darr_insert_u32(myArray, 0, 10);
+    darr_insert_u32(myArray, 1, 30);
 
-    printf("Capacity: %d\n", arr_capacity(myArray));
+    printf("Capacity: %d\n", darr_capacity(myArray));
 
-    uint32_t len = arr_length(myArray);
-    for (size_t i = 0; i < len; i++) { printf("%X ", arr_get_u32(myArray, i)); }
+    uint32_t len = darr_length(myArray);
+    for (size_t i = 0; i < len; i++) { printf("%X ", darr_get_u32(myArray, i)); }
 
-    arr_destroy(myArray);
+    darr_destroy(myArray);
 
     const char* example = "example string";
 

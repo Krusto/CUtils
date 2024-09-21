@@ -103,7 +103,7 @@ static DStringT* str_arr_get(DArrayT* arr, size_t index) { return ((DStringT**) 
 
 inline static void str_arr_push_back(DArrayT* arr, DStringT* str)
 {
-    arr_resize(arr, arr->length + 1);
+    darr_resize(arr, arr->length + 1);
     ((DStringT**) arr->data)[arr->length - 1] = str;
 }
 
@@ -330,7 +330,7 @@ inline static void str_arr_destroy(DArrayT* buf)
 {
     if (NULL != buf)
     {
-        for (size_t i = 0; i < arr_length(buf); i++) { str_destroy(str_arr_get(buf, i)); }
+        for (size_t i = 0; i < darr_length(buf); i++) { str_destroy(str_arr_get(buf, i)); }
         if (buf->data) { CFREE(buf->data, buf->length); }
         CFREE((void*) buf, DARRAY_HEADER_SIZE + sizeof(int8_t*));
     }
