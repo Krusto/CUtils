@@ -292,7 +292,7 @@ inline static BOOL file_exists(const int8_t* path)
     }
     return result;
 }
-
+#ifdef _WIN32
 inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInfoPtr)
 {
     BOOL fileExists = file_exists(path);
@@ -300,7 +300,6 @@ inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInf
     if (TRUE == fileExists)
     {
         result = FILE_OPERATION_SUCCESS;
-#ifdef _WIN32
         WIN32_FILE_ATTRIBUTE_DATA fInfo;
         GetFileAttributesEx(path, GetFileExInfoStandard, &fInfo);
         fileInfoPtr->path.data = path;
@@ -314,13 +313,61 @@ inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInf
         fileInfoPtr->lastAccessTime[1] = fInfo.ftLastAccessTime.dwHighDateTime;
         fileInfoPtr->lastWriteTime[0] = fInfo.ftLastWriteTime.dwLowDateTime;
         fileInfoPtr->lastWriteTime[1] = fInfo.ftLastWriteTime.dwHighDateTime;
-#else
-#endif
     }
     else { LOG_ERROR("File %s does not exit!\n", path); }
     return result;
 }
+#else
+#include <sys/stat.h>
 
+inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInfoPtr)
+{
+    char* absolute_path = realpath(path, NULL);
+    BOOL fileExists = file_exists(absolute_path);
+    FileOpResultT result = FILE_DOES_NOT_EXIST;
+    if (TRUE == fileExists)
+    {
+        struct stat fileStat;
+        int32_t statResult = stat(absolute_path, &fileStat);
+        if (statResult == 0)
+        {
+            CFREE(absolute_path,cstr_length(absolute_path));
+            fileInfoPtr->path.data = path;
+            fileInfoPtr->path.length = cstr_length(path);
+            if (sizeof(fileStat.st_size) > 4u)
+            {
+                fileInfoPtr->fileSize[0] = (fileStat.st_size & ((uint32_t) (~0)));
+                fileInfoPtr->fileSize[1] = ((fileStat.st_size >> 32) & ((uint32_t) (~0)));
+            }
+            else { fileInfoPtr->fileSize[0] = fileStat.st_size; }
+            if (sizeof(fileStat.st_ctime) > 4u)
+            {
+                fileInfoPtr->creationTime[0] = (fileStat.st_ctime & ((uint32_t) (~0)));
+                fileInfoPtr->creationTime[1] = ((fileStat.st_ctime >> 32) & ((uint32_t) (~0)));
+            }
+            else { fileInfoPtr->creationTime[0] = fileStat.st_ctime; }
+
+            if (sizeof(fileStat.st_atime) > 4u)
+            {
+                fileInfoPtr->lastAccessTime[0] = (fileStat.st_atime & ((uint32_t) (~0)));
+                fileInfoPtr->lastAccessTime[1] = ((fileStat.st_atime >> 32) & ((uint32_t) (~0)));
+            }
+            else { fileInfoPtr->lastAccessTime[0] = fileStat.st_atime; }
+
+            if (sizeof(fileStat.st_mtime) > 4u)
+            {
+                fileInfoPtr->lastWriteTime[0] = (fileStat.st_mtime & ((uint32_t) (~0)));
+                fileInfoPtr->lastWriteTime[1] = ((fileStat.st_mtime >> 32) & ((uint32_t) (~0)));
+            }
+            else { fileInfoPtr->lastWriteTime[0] = fileStat.st_mtime; }
+            result = FILE_OPERATION_SUCCESS;
+        }
+        else { LOG_ERROR("Can not get file stat! \n%s\n", path); }
+    }
+    else { LOG_ERROR("File %s does not exit!\n", path); }
+    return result;
+}
+#endif
 #ifdef _WIN32
 /**
  * @brief lists directory contents
@@ -377,6 +424,7 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
 #else
 
 #include <errno.h>
+#define _BSD_SOURCE
 
 /**
  * @brief lists directory contents
@@ -389,14 +437,17 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
     contents->files = str_arr_create();
     contents->directories = str_arr_create();
 
+    BOOL result = FALSE;
+
     struct dirent** namelist;
     int32_t n;
 
-    n = scandir(dir, &namelist, NULL, alphasort);
+    char* absolute_path = realpath(dir, NULL);
+
+    n = scandir(absolute_path, &namelist, NULL, alphasort);
     if (n < 0)
     {
-        LOG_ERROR("Scanning dir %s\nError: %s", dir, strerror(errno));
-        return FALSE;
+        LOG_ERROR("Scanning dir %s\nError: %s\n", absolute_path, strerror(errno));
     }
     else
     {
@@ -409,19 +460,21 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
 
             if ((namelist[tempN]->d_type == DT_DIR) && (FALSE == skip))
             {
-                DStringT* str = str_create(&namelist[tempN]->d_name, strlen(namelist[tempN]->d_name));
+                DStringT* str = str_create(&namelist[tempN]->d_name[0], strlen(namelist[tempN]->d_name));
                 str_arr_push_back(contents->directories, str);
             }
             else if (FALSE == skip)
             {
-                DStringT* str = str_create(&namelist[tempN]->d_name, strlen(namelist[tempN]->d_name));
+                DStringT* str = str_create(&namelist[tempN]->d_name[0], strlen(namelist[tempN]->d_name));
                 str_arr_push_back(contents->files, str);
             }
             CFREE(namelist[tempN], sizeof(struct dirent));
         }
         CFREE(namelist, n);
+        result = TRUE;
     }
-    return TRUE;
+    CFREE(absolute_path,cstr_length(absolute_path));
+    return result;
 }
 #endif
 

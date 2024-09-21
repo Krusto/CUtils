@@ -39,7 +39,7 @@ int main(void)
     LOG("\n\n\n");
 
     FolderContentsT f;
-    list_directory_contents("C:/Users", &f);
+    list_directory_contents("../", &f);
 
     for (size_t i = 0; i < f.files->length; i++)
     {
@@ -90,8 +90,10 @@ int main(void)
     FileOpResultT fileOpResult = get_file_info("../main.c", &fileInfo);
     if (FILE_OPERATION_SUCCESS == fileOpResult)
     {
-        printf("path: %s\n", fileInfo.path.data);
-        printf("size: %d %d\n", fileInfo.fileSize[0], fileInfo.fileSize[1]);
+        LOG_INFO("path: %s\n", fileInfo.path.data);
+        LOG_INFO("size: %d %d\n", fileInfo.fileSize[0], fileInfo.fileSize[1]);
+    }else{
+        LOG_INFO("Unknown Error");
     }
     return 0;
 }
