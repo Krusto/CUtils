@@ -40,10 +40,7 @@
 Includes
 ***********************************************************************************************************************/
 #include "CMemory.h"
-
-#ifndef uint32_t
 #include "STDTypes.h"
-#endif
 
 /***********************************************************************************************************************
 Macro Definitions
@@ -51,8 +48,6 @@ Macro Definitions
 
 #define DARRAY_INITIAL_CAPACITY 1u
 #define DARRAY_RESIZE_FACTOR 2u
-
-#define DArray_Create(type) arr_create(sizeof(type))
 
 /***********************************************************************************************************************
 Type definitions
@@ -65,45 +60,57 @@ typedef struct {
     int8_t* data;
 } DArrayT;
 
+typedef DArrayT DArrayU32T;
+typedef DArrayT DArrayI32T;
+typedef DArrayT DArrayU16T;
+typedef DArrayT DArrayI16T;
+typedef DArrayT DArrayU8T;
+typedef DArrayT DArrayI8T;
+
 /***********************************************************************************************************************
 Static functions declaration
 ***********************************************************************************************************************/
 static void arr_insert_generic(DArrayT* arr, size_t index, void* valuePtr);
-static void arr_insert_u32(DArrayT* arr, size_t index, uint32_t value);
-static void arr_insert_i32(DArrayT* arr, size_t index, int32_t value);
-static void arr_insert_u16(DArrayT* arr, size_t index, uint16_t value);
-static void arr_insert_i16(DArrayT* arr, size_t index, int16_t value);
-static void arr_insert_u8(DArrayT* arr, size_t index, uint8_t value);
-static void arr_insert_i8(DArrayT* arr, size_t index, int8_t value);
+static void arr_insert_u32(DArrayU32T* arr, size_t index, uint32_t value);
+static void arr_insert_i32(DArrayI32T* arr, size_t index, int32_t value);
+static void arr_insert_u16(DArrayU16T* arr, size_t index, uint16_t value);
+static void arr_insert_i16(DArrayI16T* arr, size_t index, int16_t value);
+static void arr_insert_u8(DArrayU8T* arr, size_t index, uint8_t value);
+static void arr_insert_i8(DArrayI8T* arr, size_t index, int8_t value);
 static void arr_resize(DArrayT* arr, size_t newLength);
 static void* arr_get_ptr(DArrayT* arr, size_t index);
-static uint32_t arr_get_u32(DArrayT* arr, size_t index);
-static int32_t arr_get_i32(DArrayT* arr, size_t index);
-static uint32_t* arr_get_u32_ptr(DArrayT* arr, size_t index);
-static int32_t* arr_get_i32_ptr(DArrayT* arr, size_t index);
-static uint16_t arr_get_u16(DArrayT* arr, size_t index);
-static int16_t arr_get_i16(DArrayT* arr, size_t index);
-static uint16_t* arr_get_u16_ptr(DArrayT* arr, size_t index);
-static int16_t* arr_get_i16_ptr(DArrayT* arr, size_t index);
-static uint8_t arr_get_u8(DArrayT* arr, size_t index);
-static int8_t arr_get_i8(DArrayT* arr, size_t index);
-static uint8_t* arr_get_u8_ptr(DArrayT* arr, size_t index);
-static int8_t* arr_get_i8_ptr(DArrayT* arr, size_t index);
+static uint32_t arr_get_u32(DArrayU32T* arr, size_t index);
+static int32_t arr_get_i32(DArrayI32T* arr, size_t index);
+static uint32_t* arr_get_u32_ptr(DArrayU32T* arr, size_t index);
+static int32_t* arr_get_i32_ptr(DArrayI32T* arr, size_t index);
+static uint16_t arr_get_u16(DArrayU16T* arr, size_t index);
+static int16_t arr_get_i16(DArrayI16T* arr, size_t index);
+static uint16_t* arr_get_u16_ptr(DArrayU16T* arr, size_t index);
+static int16_t* arr_get_i16_ptr(DArrayI16T* arr, size_t index);
+static uint8_t arr_get_u8(DArrayU8T* arr, size_t index);
+static int8_t arr_get_i8(DArrayI8T* arr, size_t index);
+static uint8_t* arr_get_u8_ptr(DArrayU8T* arr, size_t index);
+static int8_t* arr_get_i8_ptr(DArrayI8T* arr, size_t index);
+static void arr_push_u32(DArrayU32T* arr, uint32_t value);
+static void arr_push_i32(DArrayI32T* arr, int32_t value);
+static void arr_push_u16(DArrayU16T* arr, uint16_t value);
+static void arr_push_i16(DArrayI16T* arr, int16_t value);
+static void arr_push_u8(DArrayU8T* arr, uint8_t value);
+static void arr_push_i8(DArrayI8T* arr, int8_t value);
+static void arr_push_generic(DArrayT* arr, void* value);
 static void* arr_front_ptr(DArrayT* arr);
 static void* arr_back_ptr(DArrayT* arr);
-static void arr_push_u32(DArrayT* arr, uint32_t value);
-static void arr_push_i32(DArrayT* arr, int32_t value);
-static void arr_push_u16(DArrayT* arr, uint16_t value);
-static void arr_push_i16(DArrayT* arr, int16_t value);
-static void arr_push_u8(DArrayT* arr, uint8_t value);
-static void arr_push_i8(DArrayT* arr, int8_t value);
-static void arr_push_generic(DArrayT* arr, void* value);
 static BOOL arr_is_empty(DArrayT* arr);
 static size_t arr_length(DArrayT* arr);
 static size_t arr_capacity(DArrayT* arr);
-static void arr_resize(DArrayT* arr, size_t newLength);
 static void arr_destroy(DArrayT* arr);
-static void* arr_create(size_t stride);
+static DArrayU32T* arr_create_u32();
+static DArrayI32T* arr_create_i32();
+static DArrayU16T* arr_create_u16();
+static DArrayI16T* arr_create_i16();
+static DArrayU8T* arr_create_u8();
+static DArrayI8T* arr_create_i8();
+static DArrayT* arr_create_generic(size_t typeSize);
 static void arr_erase(DArrayT* arr, size_t index);
 static void arr_insert(DArrayT* arr, uint32_t index, void* element);
 static void arr_shrink_to_fit(DArrayT* arr);
@@ -131,65 +138,74 @@ inline static void arr_insert_generic(DArrayT* arr, size_t index, void* valuePtr
     }
 }
 
-inline static void arr_insert_u32(DArrayT* arr, size_t index, uint32_t value)
+inline static void arr_insert_u32(DArrayU32T* arr, size_t index, uint32_t value)
 {
     arr_insert_generic(arr, index, &value);
 }
 
-inline static void arr_insert_i32(DArrayT* arr, size_t index, int32_t value) { arr_insert_generic(arr, index, &value); }
-
-inline static void arr_insert_u16(DArrayT* arr, size_t index, uint16_t value)
+inline static void arr_insert_i32(DArrayI32T* arr, size_t index, int32_t value)
 {
     arr_insert_generic(arr, index, &value);
 }
 
-inline static void arr_insert_i16(DArrayT* arr, size_t index, int16_t value) { arr_insert_generic(arr, index, &value); }
+inline static void arr_insert_u16(DArrayU16T* arr, size_t index, uint16_t value)
+{
+    arr_insert_generic(arr, index, &value);
+}
 
-inline static void arr_insert_u8(DArrayT* arr, size_t index, uint8_t value) { arr_insert_generic(arr, index, &value); }
+inline static void arr_insert_i16(DArrayI16T* arr, size_t index, int16_t value)
+{
+    arr_insert_generic(arr, index, &value);
+}
 
-inline static void arr_insert_i8(DArrayT* arr, size_t index, int8_t value) { arr_insert_generic(arr, index, &value); }
+inline static void arr_insert_u8(DArrayU8T* arr, size_t index, uint8_t value)
+{
+    arr_insert_generic(arr, index, &value);
+}
+
+inline static void arr_insert_i8(DArrayI8T* arr, size_t index, int8_t value) { arr_insert_generic(arr, index, &value); }
 
 inline static void* arr_get_ptr(DArrayT* arr, size_t index) { return &arr->data[index * arr->elementSize]; }
 
-inline static uint32_t arr_get_u32(DArrayT* arr, size_t index) { return *((uint32_t*) arr_get_ptr(arr, index)); }
+inline static uint32_t arr_get_u32(DArrayU32T* arr, size_t index) { return *((uint32_t*) arr_get_ptr(arr, index)); }
 
-inline static int32_t arr_get_i32(DArrayT* arr, size_t index) { return *((int32_t*) arr_get_ptr(arr, index)); }
+inline static int32_t arr_get_i32(DArrayI32T* arr, size_t index) { return *((int32_t*) arr_get_ptr(arr, index)); }
 
-inline static uint32_t* arr_get_u32_ptr(DArrayT* arr, size_t index) { return ((uint32_t*) arr_get_ptr(arr, index)); }
+inline static uint32_t* arr_get_u32_ptr(DArrayU32T* arr, size_t index) { return ((uint32_t*) arr_get_ptr(arr, index)); }
 
-inline static int32_t* arr_get_i32_ptr(DArrayT* arr, size_t index) { return ((int32_t*) arr_get_ptr(arr, index)); }
+inline static int32_t* arr_get_i32_ptr(DArrayI32T* arr, size_t index) { return ((int32_t*) arr_get_ptr(arr, index)); }
 
-inline static uint16_t arr_get_u16(DArrayT* arr, size_t index) { return *((uint16_t*) arr_get_ptr(arr, index)); }
+inline static uint16_t arr_get_u16(DArrayU16T* arr, size_t index) { return *((uint16_t*) arr_get_ptr(arr, index)); }
 
-inline static int16_t arr_get_i16(DArrayT* arr, size_t index) { return *((int16_t*) arr_get_ptr(arr, index)); }
+inline static int16_t arr_get_i16(DArrayI16T* arr, size_t index) { return *((int16_t*) arr_get_ptr(arr, index)); }
 
-inline static uint16_t* arr_get_u16_ptr(DArrayT* arr, size_t index) { return ((uint16_t*) arr_get_ptr(arr, index)); }
+inline static uint16_t* arr_get_u16_ptr(DArrayU16T* arr, size_t index) { return ((uint16_t*) arr_get_ptr(arr, index)); }
 
-inline static int16_t* arr_get_i16_ptr(DArrayT* arr, size_t index) { return ((int16_t*) arr_get_ptr(arr, index)); }
+inline static int16_t* arr_get_i16_ptr(DArrayI16T* arr, size_t index) { return ((int16_t*) arr_get_ptr(arr, index)); }
 
-inline static uint8_t arr_get_u8(DArrayT* arr, size_t index) { return *((uint8_t*) arr_get_ptr(arr, index)); }
+inline static uint8_t arr_get_u8(DArrayU8T* arr, size_t index) { return *((uint8_t*) arr_get_ptr(arr, index)); }
 
-inline static int8_t arr_get_i8(DArrayT* arr, size_t index) { return *((int8_t*) arr_get_ptr(arr, index)); }
+inline static int8_t arr_get_i8(DArrayI8T* arr, size_t index) { return *((int8_t*) arr_get_ptr(arr, index)); }
 
-inline static uint8_t* arr_get_u8_ptr(DArrayT* arr, size_t index) { return ((uint8_t*) arr_get_ptr(arr, index)); }
+inline static uint8_t* arr_get_u8_ptr(DArrayU8T* arr, size_t index) { return ((uint8_t*) arr_get_ptr(arr, index)); }
 
-inline static int8_t* arr_get_i8_ptr(DArrayT* arr, size_t index) { return ((int8_t*) arr_get_ptr(arr, index)); }
+inline static int8_t* arr_get_i8_ptr(DArrayI8T* arr, size_t index) { return ((int8_t*) arr_get_ptr(arr, index)); }
 
 inline static void* arr_front_ptr(DArrayT* arr) { return arr_get_ptr(arr, 0); }
 
 inline static void* arr_back_ptr(DArrayT* arr) { return arr_get_ptr(arr, arr->length - 1); }
 
-inline static void arr_push_u32(DArrayT* arr, uint32_t value) { arr_push_generic(arr, &value); }
+inline static void arr_push_u32(DArrayU32T* arr, uint32_t value) { arr_push_generic(arr, &value); }
 
-inline static void arr_push_i32(DArrayT* arr, int32_t value) { arr_push_generic(arr, &value); }
+inline static void arr_push_i32(DArrayI32T* arr, int32_t value) { arr_push_generic(arr, &value); }
 
-inline static void arr_push_u16(DArrayT* arr, uint16_t value) { arr_push_generic(arr, &value); }
+inline static void arr_push_u16(DArrayU16T* arr, uint16_t value) { arr_push_generic(arr, &value); }
 
-inline static void arr_push_i16(DArrayT* arr, int16_t value) { arr_push_generic(arr, &value); }
+inline static void arr_push_i16(DArrayI16T* arr, int16_t value) { arr_push_generic(arr, &value); }
 
-inline static void arr_push_u8(DArrayT* arr, uint8_t value) { arr_push_generic(arr, &value); }
+inline static void arr_push_u8(DArrayU8T* arr, uint8_t value) { arr_push_generic(arr, &value); }
 
-inline static void arr_push_i8(DArrayT* arr, int8_t value) { arr_push_generic(arr, &value); }
+inline static void arr_push_i8(DArrayI8T* arr, int8_t value) { arr_push_generic(arr, &value); }
 
 inline static void arr_push_generic(DArrayT* arr, void* value)
 {
@@ -233,7 +249,19 @@ inline static void arr_destroy(DArrayT* arr)
     CFREE(arr, sizeof(arr));
 }
 
-inline static void* arr_create(size_t stride)
+inline static DArrayT* arr_create_u32() { return arr_create_generic(sizeof(uint32_t)); }
+
+inline static DArrayT* arr_create_i32() { return arr_create_generic(sizeof(int32_t)); }
+
+inline static DArrayT* arr_create_u16() { return arr_create_generic(sizeof(uint16_t)); }
+
+inline static DArrayT* arr_create_i16() { return arr_create_generic(sizeof(int16_t)); }
+
+inline static DArrayT* arr_create_u8() { return arr_create_generic(sizeof(uint8_t)); }
+
+inline static DArrayT* arr_create_i8() { return arr_create_generic(sizeof(int8_t)); }
+
+inline static DArrayT* arr_create_generic(size_t typeSize)
 {
     DArrayT* result = NULL;
 
@@ -244,13 +272,13 @@ inline static void* arr_create(size_t stride)
     {
         result->length = 0;                        // set length to 0
         result->capacity = DARRAY_INITIAL_CAPACITY;// set capacity to DARRAY_INITIAL_CAPACITY
-        result->elementSize = stride;              // set element size to stride
+        result->elementSize = typeSize;            // set element size to stride
     }
-    uint8_t* dataPtr = (uint8_t*) CMALLOC(stride);
+    uint8_t* dataPtr = (uint8_t*) CMALLOC(typeSize);
     if (NULL == result) { LOG_ERROR("Can not allocate array arrfer!\n"); }
     else { result->data = dataPtr; }
 
-    return (void*) result;
+    return result;
 }
 
 inline static void arr_erase(DArrayT* arr, size_t index)

@@ -6,14 +6,14 @@
 
 int main(void)
 {
-    DArrayT* myArray = arr_create(sizeof(uint32_t));
+    DArrayT* myArray = arr_create_u32();
 
     arr_push_u32(myArray, 0xFF000000);
     arr_push_u32(myArray, 0xFFFF0000);
     arr_push_u32(myArray, 0xFFFFFF00);
     arr_push_u32(myArray, 0xFFFFFFFF);
     arr_push_u32(myArray, 0xF0F0F0F0);
-    arr_push_u32(myArray, 0x1F0F0F0F);
+    arr_push_u32(myArray, 0x1F0F0F0F) ;
     printf("Capacity: %d\n", arr_capacity(myArray));
     arr_shrink_to_fit(myArray);
     printf("Capacity: %d\n", arr_capacity(myArray));
