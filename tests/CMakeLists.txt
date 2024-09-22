@@ -20,7 +20,7 @@ target_link_libraries(CUtil_Test PUBLIC GTest::gtest_main)
 
 set_target_properties(CUtil_Test PROPERTIES LINKER_LANGUAGE CXX)
 
-target_include_directories(CUtil_Test PRIVATE ../)
+target_include_directories(CUtil_Test PRIVATE ../include)
 
 target_include_directories(CUtil_Test PRIVATE ${CMAKE_SOURCE_DIR}/vendor/gmock-global-1.0.2/include)
 

@@ -154,9 +154,9 @@ inline static size_t cstr_length(const int8_t* str)
     const uint32_t* longword_ptr;
     uint32_t longword, himagic, lomagic;
 
-    /* Handle the first few int8_tacters by reading one int8_tacter at a time.
+    /* Handle the first few characters by reading one character at a time.
      Do this until CHAR_PTR is aligned on a longword boundary.  */
-    for (int8_t_ptr = str; ((uint32_t) int8_t_ptr & (sizeof(longword) - 1)) != 0; ++int8_t_ptr)
+    for (int8_t_ptr = str; ((size_t) int8_t_ptr & (sizeof(longword) - 1)) != 0; ++int8_t_ptr)
         if (*int8_t_ptr == '\0') return int8_t_ptr - str;
 
     /* All these elucidatory comments refer to 4-byte longwords,
@@ -184,7 +184,7 @@ inline static size_t cstr_length(const int8_t* str)
     }
     if (sizeof(longword) > 8) abort();
 
-    /* Instead of the traditional loop which tests each int8_tacter,
+    /* Instead of the traditional loop which tests each character,
      we will test a longword at a time.  The tricky part is testing
      if *any of the four* bytes in the longword in question are zero.  */
     for (;;)
