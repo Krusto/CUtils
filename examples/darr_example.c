@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #define CUTILS_VERBOSE
 #include "CFilesystem.h"
 #include "DString.h"
