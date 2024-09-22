@@ -41,8 +41,17 @@
 Platform specific std type definitions
 ***********************************************************************************************************************/
 
+#ifdef BOOL
+#undef BOOL
+#endif
 #define BOOL char
+#ifdef TRUE
+#undef TRUE
+#endif
 #define TRUE 1u == 1u
+#ifdef FALSE
+#undef FALSE
+#endif
 #define FALSE 1u == 0u
 
 #ifdef uint8_t
@@ -81,6 +90,6 @@ Platform specific std type definitions
 #ifdef UINT16_MAX
 #undef UINT16_MAX
 #endif
-#define UINT16_MAX ( ( uint16_t ) -1 )
+#define UINT16_MAX ((uint16_t) -1)
 
 #endif//STDTYPES_HEADER
