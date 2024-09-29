@@ -96,6 +96,9 @@ static BOOL cstr_is_utf8(const int8_t* str);
 static BOOL utf8_is_continuation_byte(int8_t byte);
 static BOOL utf8_is_byte_ascii(int8_t byte);
 static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
+static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index);
+static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex);
+static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex);
 static BOOL str_is_valid_utf8(DStringT* buf);
 static void str_resize(DStringT* buf, size_t newLength);
 static void str_destroy(DStringT* buf);
@@ -355,6 +358,31 @@ inline static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length)
     }
 
     return is_valid;// Single return point
+}
+
+inline static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index)
+{
+    int8_t byte = buffer[index] >> 4;
+    uint8_t count = 0;
+    for (size_t i = 0; i < 4; i++) { count += (byte >> i) & 0x1; }
+
+    return count;
+}
+
+inline static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex)
+{
+    int8_t* result = NULL;
+    int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
+    if (currentIndex + currentCharLength < length) { result = &buffer[currentIndex + currentCharLength]; };
+    return result;
+}
+
+inline static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex)
+{
+    int8_t* result = NULL;
+    int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
+    if (currentIndex - currentCharLength >= 0) { result = &buffer[currentIndex - currentCharLength]; };
+    return result;
 }
 
 inline static BOOL str_is_valid_utf8(DStringT* buf) { return cstr_is_valid_utf8(buf->data, buf->length); }
