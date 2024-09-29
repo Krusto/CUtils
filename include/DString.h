@@ -90,15 +90,16 @@ static int8_t* str_back_ptr(DStringT* str);
 static BOOL is_str_empty(DStringT* str);
 static DStringT* str_create(const int8_t* str, size_t size);
 static size_t cstr_length(const int8_t* str);
-static size_t cstr_utf8_length(const char* str);
-static BOOL cstr_is_utf8(const char* str);
-static BOOL utf8_is_continuation_byte(uint8_t byte);
-static BOOL utf8_is_byte_ascii(uint8_t byte);
-static BOOL cstr_is_valid_utf8(const uint8_t* input, size_t length);
+static size_t cstr_utf8_length(const int8_t* str);
+static BOOL cstr_is_utf8(const int8_t* str);
+static BOOL utf8_is_continuation_byte(int8_t byte);
+static BOOL utf8_is_byte_ascii(int8_t byte);
+static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
+static BOOL str_is_valid_utf8(DStringT* buf);
 static void str_resize(DStringT* buf, size_t newLength);
 static void str_destroy(DStringT* buf);
 static void str_erase(DStringT* buf, size_t index);
-static void str_insert(DStringT* buf, uint32_t index, void* element);
+static void str_insert(DStringT* buf, uint32_t index, int8_t* element);
 static void str_shring_to_fit(DStringT* buf);
 static void str_reserve(DStringT* buf, size_t newCapacity);
 static void* str_arr_create(void);
@@ -224,14 +225,14 @@ inline static size_t cstr_length(const int8_t* str)
     }
 }
 
-inline static size_t cstr_utf8_length(const char* str)
+inline static size_t cstr_utf8_length(const int8_t* str)
 {
     size_t count = 0;
     while (*str) { count += !utf8_is_continuation_byte(*str++); }
     return count;
 }
 
-inline static BOOL cstr_is_utf8(const char* str)
+inline static BOOL cstr_is_utf8(const int8_t* str)
 {
     BOOL result = FALSE;
     do {
@@ -240,15 +241,15 @@ inline static BOOL cstr_is_utf8(const char* str)
     return result;
 }
 
-inline static BOOL utf8_is_continuation_byte(uint8_t byte) { return (byte & UNICODE_UTF8_BYTE1_MASK) == 0x80; }
+inline static BOOL utf8_is_continuation_byte(int8_t byte) { return (byte & UNICODE_UTF8_BYTE1_MASK) == 0x80; }
 
-inline static BOOL utf8_is_continuation_byte2(uint8_t byte) { return (byte & UNICODE_UTF8_BYTE2_MASK) == 0x80; }
+inline static BOOL utf8_is_continuation_byte2(int8_t byte) { return (byte & UNICODE_UTF8_BYTE2_MASK) == 0x80; }
 
-inline static BOOL utf8_is_continuation_byte3(uint8_t byte) { return (byte & UNICODE_UTF8_BYTE3_MASK) == 0x80; }
+inline static BOOL utf8_is_continuation_byte3(int8_t byte) { return (byte & UNICODE_UTF8_BYTE3_MASK) == 0x80; }
 
-inline static BOOL utf8_is_byte_ascii(uint8_t byte) { return byte <= UNICODE_UTF8_ASCII_RANGE_MAX; }
+inline static BOOL utf8_is_byte_ascii(int8_t byte) { return byte <= UNICODE_UTF8_ASCII_RANGE_MAX; }
 
-inline static BOOL cstr_is_valid_utf8(const uint8_t* input, size_t length)
+inline static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length)
 {
     BOOL is_valid = TRUE;// Accumulates result
     size_t index = 0;
@@ -340,6 +341,8 @@ inline static BOOL cstr_is_valid_utf8(const uint8_t* input, size_t length)
     return is_valid;// Single return point
 }
 
+inline static BOOL str_is_valid_utf8(DStringT* buf) { return cstr_is_valid_utf8(buf->data, buf->length); }
+
 inline static void str_resize(DStringT* buf, size_t newLength)
 {
     if (newLength > buf->length)
@@ -390,7 +393,7 @@ inline static void str_erase(DStringT* buf, size_t index)
     }
 }
 
-inline static void str_insert(DStringT* buf, uint32_t index, void* element)
+inline static void str_insert(DStringT* buf, uint32_t index, int8_t* element)
 {
     void* src = &(buf->data[index]);
     void* dest = &(buf->data[index + 1]);
