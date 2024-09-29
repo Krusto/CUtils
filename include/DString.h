@@ -91,6 +91,7 @@ static BOOL is_str_empty(DStringT* str);
 static DStringT* str_create(const int8_t* str, size_t size);
 static size_t cstr_length(const int8_t* str);
 static size_t cstr_utf8_length(const int8_t* str);
+static BOOL cstr_contains_utf8_bom(const int8_t* str);
 static BOOL cstr_is_utf8(const int8_t* str);
 static BOOL utf8_is_continuation_byte(int8_t byte);
 static BOOL utf8_is_byte_ascii(int8_t byte);
@@ -232,12 +233,27 @@ inline static size_t cstr_utf8_length(const int8_t* str)
     return count;
 }
 
+inline static BOOL cstr_contains_utf8_bom(const int8_t* str)
+{
+    BOOL result = TRUE;
+    const int8_t utf8_bom[3] = {0xEF, 0xBB, 0xBF};
+    for (size_t i = 0; i < 3; i++)
+    {
+        if (str[i] != utf8_bom[i]) { result = FALSE; }
+    }
+    return result;
+}
+
 inline static BOOL cstr_is_utf8(const int8_t* str)
 {
     BOOL result = FALSE;
-    do {
-        result = utf8_is_byte_ascii(*str++);
-    } while (*str && result == FALSE);
+    if (cstr_contains_utf8_bom(str)) { result = TRUE; }
+    else
+    {
+        do {
+            result = utf8_is_byte_ascii(*str++);
+        } while (*str && result == FALSE);
+    }
     return result;
 }
 
