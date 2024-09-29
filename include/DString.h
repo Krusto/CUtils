@@ -60,6 +60,12 @@ Macro Definitions
 #define DSTRING_NULL_TERMINATION_LENGTH 1u
 #define DSTRING_NULL_TERMINATOR '\0';
 
+#define UNICODE_UTF8_ASCII_RANGE_MAX 0x7F
+#define UNICODE_UTF8_BYTE1_MASK 0xC0
+#define UNICODE_UTF8_BYTE2_MASK 0xE0
+#define UNICODE_UTF8_BYTE3_MASK 0xF0
+#define UNICODE_UTF8_BYTE4_MASK 0xF8
+
 /***********************************************************************************************************************
 Type definitions
 ***********************************************************************************************************************/
@@ -84,6 +90,11 @@ static int8_t* str_back_ptr(DStringT* str);
 static BOOL is_str_empty(DStringT* str);
 static DStringT* str_create(const int8_t* str, size_t size);
 static size_t cstr_length(const int8_t* str);
+static size_t cstr_utf8_length(const char* str);
+static BOOL cstr_is_utf8(const char* str);
+static BOOL utf8_is_continuation_byte(uint8_t byte);
+static BOOL utf8_is_byte_ascii(uint8_t byte);
+static BOOL cstr_is_valid_utf8(const uint8_t* input, size_t length);
 static void str_resize(DStringT* buf, size_t newLength);
 static void str_destroy(DStringT* buf);
 static void str_erase(DStringT* buf, size_t index);
@@ -211,6 +222,122 @@ inline static size_t cstr_length(const int8_t* str)
             }
         }
     }
+}
+
+inline static size_t cstr_utf8_length(const char* str)
+{
+    size_t count = 0;
+    while (*str) { count += !utf8_is_continuation_byte(*str++); }
+    return count;
+}
+
+inline static BOOL cstr_is_utf8(const char* str)
+{
+    BOOL result = FALSE;
+    do {
+        result = utf8_is_byte_ascii(*str++);
+    } while (*str && result == FALSE);
+    return result;
+}
+
+inline static BOOL utf8_is_continuation_byte(uint8_t byte) { return (byte & UNICODE_UTF8_BYTE1_MASK) == 0x80; }
+
+inline static BOOL utf8_is_continuation_byte2(uint8_t byte) { return (byte & UNICODE_UTF8_BYTE2_MASK) == 0x80; }
+
+inline static BOOL utf8_is_continuation_byte3(uint8_t byte) { return (byte & UNICODE_UTF8_BYTE3_MASK) == 0x80; }
+
+inline static BOOL utf8_is_byte_ascii(uint8_t byte) { return byte <= UNICODE_UTF8_ASCII_RANGE_MAX; }
+
+inline static BOOL cstr_is_valid_utf8(const uint8_t* input, size_t length)
+{
+    BOOL is_valid = TRUE;// Accumulates result
+    size_t index = 0;
+
+    while (index < length)
+    {
+        uint8_t byte = input[index];
+
+        // Check for 1-byte sequence (ASCII, 0xxxxxxx)
+        if (utf8_is_byte_ascii(byte))
+        {
+            index++;
+            continue;
+        }
+
+        // Check for 2-byte sequence (110xxxxx 10xxxxxx)
+        if ((byte & UNICODE_UTF8_BYTE2_MASK) == UNICODE_UTF8_BYTE1_MASK)
+        {
+            if (index + 1 >= length || !utf8_is_continuation_byte(input[index + 1]))
+            {
+                is_valid = FALSE;
+                break;
+            }
+            // Overlong encoding: code points that should be in 1 byte
+            if (byte <= 0xC1)
+            {
+                is_valid = FALSE;
+                break;
+            }
+            index += 2;
+            continue;
+        }
+
+        // Check for 3-byte sequence (1110xxxx 10xxxxxx 10xxxxxx)
+        if ((byte & UNICODE_UTF8_BYTE3_MASK) == UNICODE_UTF8_BYTE2_MASK)
+        {
+            if (index + 2 >= length || !utf8_is_continuation_byte(input[index + 1]) ||
+                !utf8_is_continuation_byte(input[index + 2]))
+            {
+                is_valid = FALSE;
+                break;
+            }
+            // Overlong encoding: code points that should be in 2 bytes
+            if (byte == UNICODE_UTF8_BYTE2_MASK && utf8_is_continuation_byte2(input[index + 1]))
+            {
+                is_valid = FALSE;
+                break;
+            }
+            // Invalid surrogates (U+D800 to U+DFFF)
+            if (byte == 0xED && (input[index + 1] & 0xE0) == 0xA0)
+            {
+                is_valid = FALSE;
+                break;
+            }
+            index += 3;
+            continue;
+        }
+
+        // Check for 4-byte sequence (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
+        if ((byte & UNICODE_UTF8_BYTE4_MASK) == UNICODE_UTF8_BYTE3_MASK)
+        {
+            if (index + 3 >= length || !utf8_is_continuation_byte(input[index + 1]) ||
+                !utf8_is_continuation_byte(input[index + 2]) || !utf8_is_continuation_byte(input[index + 3]))
+            {
+                is_valid = FALSE;
+                break;
+            }
+            // Overlong encoding: code points that should be in 3 bytes
+            if (byte == UNICODE_UTF8_BYTE3_MASK && utf8_is_continuation_byte3(input[index + 1]))
+            {
+                is_valid = FALSE;
+                break;
+            }
+            // Code points greater than U+10FFFF
+            if (byte > 0xF4 || (byte == 0xF4 && (input[index + 1] & 0xF0) > 0x8F))
+            {
+                is_valid = FALSE;
+                break;
+            }
+            index += 4;
+            continue;
+        }
+
+        // Any other byte patterns are invalid
+        is_valid = FALSE;
+        break;
+    }
+
+    return is_valid;// Single return point
 }
 
 inline static void str_resize(DStringT* buf, size_t newLength)

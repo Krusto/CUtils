@@ -3,7 +3,6 @@
 
 #define CUTILS_VERBOSE
 #include "CFilesystem.h"
-#include "DString.h"
 
 int main(void)
 {
@@ -14,5 +13,6 @@ int main(void)
     LOG_INFO("%d\n", darr_get_u32(myArray, 0));
 
     darr_destroy(myArray);
+
     return 0;
 }
