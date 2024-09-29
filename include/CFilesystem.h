@@ -77,6 +77,7 @@ typedef enum
     FILE_UNKNOWN_ERROR,
     FILE_OPERATION_SUCCESS,
     FILE_BUFFER_ALLOCATION_ERROR,
+    FILE_CORRUPTED_OR_WRONG_ENCODING
 } FileOpResultT;
 
 typedef struct {
@@ -105,7 +106,7 @@ Static functions implementation
  * @param buffer Read data from file
  * @return File Operation Result
  */
-inline static FileOpResultT file_read_binary(const int8_t* filename, size_t* filesize, uint8_t** buffer)
+inline static FileOpResultT file_read_binary(const int8_t* filename, size_t* filesize, int8_t** buffer)
 {
     FileOpResultT result = FILE_READ_SUCCESFULLY;
     // start processing
@@ -150,7 +151,7 @@ inline static FileOpResultT file_read_binary(const int8_t* filename, size_t* fil
  * @param buffer Read data from the file
  * @return File Operation Result
  */
-inline static FileOpResultT file_read_string(const int8_t* filename, size_t* filesize, uint8_t** buffer)
+inline static FileOpResultT file_read_string(const int8_t* filename, size_t* filesize, int8_t** buffer)
 {
     FileOpResultT result = FILE_READ_SUCCESFULLY;
 
@@ -189,6 +190,23 @@ inline static FileOpResultT file_read_string(const int8_t* filename, size_t* fil
         fclose(fileIn);
     }
 
+    return result;
+}
+
+FileOpResultT file_read_utf8(const int8_t* filename, size_t* filesize, int8_t** buffer)
+{
+
+    FileOpResultT result = file_read_string(filename, filesize, buffer);
+
+    if (FILE_READ_SUCCESFULLY == result)
+    {
+        if (cstr_contains_utf8_bom(*buffer) == FALSE) { LOG_INFO("File does not contain utf-8 BOM\n"); }
+        if (cstr_is_valid_utf8(*buffer, filesize) == FALSE)
+        {
+            LOG_ERROR("File is corrupted or does not use utf-8 encoding!\n");
+            result = FILE_CORRUPTED_OR_WRONG_ENCODING;
+        }
+    }
     return result;
 }
 
@@ -238,7 +256,7 @@ inline static FileOpResultT file_write_string(const int8_t* filename, const int8
  * @param filesize Size of the buffer to write
  * @return File Operation Result
  */
-inline static FileOpResultT file_write_binary(const int8_t* filename, const uint8_t* buffer, size_t filesize)
+inline static FileOpResultT file_write_binary(const int8_t* filename, const int8_t* buffer, size_t filesize)
 {
     FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
