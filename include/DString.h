@@ -97,8 +97,8 @@ static BOOL utf8_is_continuation_byte(int8_t byte);
 static BOOL utf8_is_byte_ascii(int8_t byte);
 static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
 static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index);
-static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex);
-static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex);
+static const int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex);
+static const int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex);
 static wchar_t utf8_to_unicode(const int8_t* utf8_data);
 static BOOL str_is_valid_utf8(DStringT* buf);
 static void str_resize(DStringT* buf, size_t newLength);
@@ -370,7 +370,7 @@ inline static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index)
     return count;
 }
 
-inline static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex)
+inline static const int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex)
 {
     int8_t* result = NULL;
     int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
@@ -382,7 +382,7 @@ inline static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, 
     return result;
 }
 
-inline static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex)
+inline static const int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex)
 {
     int8_t* result = NULL;
     int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
