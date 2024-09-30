@@ -225,8 +225,6 @@ FileOpResultT file_read_utf8(const int8_t* filename, size_t* filesize, int8_t** 
         {
             // copy the file into the buffer.
             fread(buffer, 1, *filesize, fileIn);
-            buffer[*filesize] = '\0';
-            *filesize++;
         }
         fclose(fileIn);
     }
