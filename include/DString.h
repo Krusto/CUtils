@@ -99,6 +99,7 @@ static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
 static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index);
 static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex);
 static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex);
+static wchar_t utf8_to_unicode(const int8_t* utf8_data);
 static BOOL str_is_valid_utf8(DStringT* buf);
 static void str_resize(DStringT* buf, size_t newLength);
 static void str_destroy(DStringT* buf);
@@ -383,6 +384,33 @@ inline static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, 
     int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
     if (currentIndex - currentCharLength >= 0) { result = &buffer[currentIndex - currentCharLength]; };
     return result;
+}
+
+inline static wchar_t utf8_to_unicode(const int8_t* utf8_data)
+{
+    wchar_t unicode = 0;
+    uint8_t length = utf8_get_char_length(utf8_data, 0);
+
+    switch (length)
+    {
+        case 1:
+            unicode = utf8_data[0];
+            break;
+        case 2:
+            unicode = ((utf8_data[0] & 0x1F) << 6) | (utf8_data[1] & 0x3F);
+            break;
+        case 3:
+            unicode = ((utf8_data[0] & 0x0F) << 12) | ((utf8_data[1] & 0x3F) << 6) | (utf8_data[2] & 0x3F);
+            break;
+        case 4:
+            unicode = ((utf8_data[0] & 0x07) << 18) | ((utf8_data[1] & 0x3F) << 12) | ((utf8_data[2] & 0x3F) << 6) |
+                      (utf8_data[3] & 0x3F);
+            break;
+        default:
+            break;
+    }
+
+    return unicode;
 }
 
 inline static BOOL str_is_valid_utf8(DStringT* buf) { return cstr_is_valid_utf8(buf->data, buf->length); }

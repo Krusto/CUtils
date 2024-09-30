@@ -87,6 +87,11 @@ Platform specific std type definitions
 #endif
 #define size_t uint32_t
 
+#ifdef wchar_t
+#undef wchar_t
+#endif
+#define wchar_t int32_t
+
 #ifdef UINT16_MAX
 #undef UINT16_MAX
 #endif
