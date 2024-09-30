@@ -96,7 +96,7 @@ static BOOL cstr_is_utf8(const int8_t* str);
 static BOOL utf8_is_continuation_byte(int8_t byte);
 static BOOL utf8_is_byte_ascii(int8_t byte);
 static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
-static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index);
+static uint8_t utf8_get_char_length(int8_t byte);
 static const void utf8_go_next_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndexPtr);
 static const void utf8_go_prev_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndexPtr);
 static wchar_t utf8_to_unicode(const int8_t* utf8_data);
@@ -361,9 +361,8 @@ inline static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length)
     return is_valid;// Single return point
 }
 
-inline static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index)
+inline static uint8_t utf8_get_char_length(int8_t byte)
 {
-    int8_t byte = buffer[index];
     uint8_t count = 0;
     if ((byte & (UNICODE_UTF8_ASCII_RANGE_MAX + 1)) == 0) { count = 1; }
     else if ((byte & UNICODE_UTF8_BYTE2_MASK) == UNICODE_UTF8_BYTE1_MASK) { count = 2; }
@@ -377,7 +376,7 @@ inline static const void utf8_go_next_char(const int8_t* buffer, uint32_t length
 {
     uint32_t currentIndex = *currentIndexPtr;
 
-    uint32_t newOffset = currentIndex + utf8_get_char_length(buffer, currentIndex);
+    uint32_t newOffset = currentIndex + utf8_get_char_length(buffer[currentIndex]);
     if (newOffset < length) { (*currentIndexPtr) = newOffset; };
 }
 
@@ -386,7 +385,7 @@ inline static const void utf8_go_prev_char(const int8_t* buffer, uint32_t length
 inline static wchar_t utf8_to_unicode(const int8_t* utf8_data)
 {
     wchar_t unicode = 0;
-    uint8_t length = utf8_get_char_length(utf8_data, 0);
+    uint8_t length = utf8_get_char_length(utf8_data[0]);
 
     switch (length)
     {
