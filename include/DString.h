@@ -370,19 +370,27 @@ inline static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index)
     return count;
 }
 
-inline static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex)
+inline static int8_t* utf8_get_next_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex)
 {
     int8_t* result = NULL;
     int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
-    if (currentIndex + currentCharLength < length) { result = &buffer[currentIndex + currentCharLength]; };
+    if (currentIndex + currentCharLength < length)
+    {
+        result = &buffer[*currentIndex + currentCharLength];
+        *currentIndex += currentCharLength;
+    };
     return result;
 }
 
-inline static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t currentIndex)
+inline static int8_t* utf8_get_prev_char(const int8_t* buffer, uint32_t length, uint32_t* currentIndex)
 {
     int8_t* result = NULL;
     int8_t currentCharLength = utf8_get_char_length(buffer, currentIndex);
-    if (currentIndex - currentCharLength >= 0) { result = &buffer[currentIndex - currentCharLength]; };
+    if (currentIndex - currentCharLength >= 0)
+    {
+        result = &buffer[*currentIndex - currentCharLength];
+        *currentIndex += currentCharLength;
+    };
     return result;
 }
 
