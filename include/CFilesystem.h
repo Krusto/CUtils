@@ -196,12 +196,44 @@ inline static FileOpResultT file_read_string(const int8_t* filename, size_t* fil
 FileOpResultT file_read_utf8(const int8_t* filename, size_t* filesize, int8_t** buffer)
 {
 
-    FileOpResultT result = file_read_string(filename, filesize, buffer);
+    FileOpResultT result = FILE_READ_SUCCESFULLY;
+    // start processing
+    FILE* fileIn = fopen(filename, "rb");// open input file (binary)
 
+    if (fileIn == NULL)
+    {
+        LOG_ERROR("Can not open %s!\n", filename);
+        result = FILE_OPEN_ERROR;
+    }
+    else
+    {
+        LOG_INFO("Opened %s\n", filename);
+        // obtain file size.
+        fseek(fileIn, 0, SEEK_END);
+        *filesize = ftell(fileIn);
+        rewind(fileIn);
+        LOG_INFO("Filesize %d bytes.\n", *filesize);
+
+        // allocate memory to contain the whole file.
+        *buffer = (uint8_t*) CMALLOC(*filesize + 1);
+        if (buffer == NULL)
+        {
+            LOG_ERROR("Malloc for input file buffer failed(not enough memory?)\n");
+            result = FILE_BUFFER_ALLOCATION_ERROR;
+        }
+        else
+        {
+            // copy the file into the buffer.
+            fread(buffer, 1, *filesize, fileIn);
+            buffer[*filesize] = '\0';
+            *filesize++;
+        }
+        fclose(fileIn);
+    }
     if (FILE_READ_SUCCESFULLY == result)
     {
         if (cstr_contains_utf8_bom(*buffer) == FALSE) { LOG_INFO("File does not contain utf-8 BOM\n"); }
-        if (cstr_is_valid_utf8(*buffer, filesize) == FALSE)
+        if (cstr_is_valid_utf8(*buffer, *filesize) == FALSE)
         {
             LOG_ERROR("File is corrupted or does not use utf-8 encoding!\n");
             result = FILE_CORRUPTED_OR_WRONG_ENCODING;
