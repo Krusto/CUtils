@@ -363,9 +363,12 @@ inline static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length)
 
 inline static uint8_t utf8_get_char_length(const int8_t* buffer, uint32_t index)
 {
-    int8_t byte = buffer[index] >> 4;
+    int8_t byte = buffer[index];
     uint8_t count = 0;
-    for (size_t i = 0; i < 4; i++) { count += (byte >> i) & 0x1; }
+    if ((byte & (UNICODE_UTF8_ASCII_RANGE_MAX + 1)) == 0) { count = 1; }
+    else if ((byte & UNICODE_UTF8_BYTE2_MASK) == UNICODE_UTF8_BYTE1_MASK) { count = 2; }
+    else if ((byte & UNICODE_UTF8_BYTE3_MASK) == UNICODE_UTF8_BYTE2_MASK) { count = 3; }
+    else if ((byte & UNICODE_UTF8_BYTE4_MASK) == UNICODE_UTF8_BYTE3_MASK) { count = 4; }
 
     return count;
 }
