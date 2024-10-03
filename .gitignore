@@ -15,3 +15,5 @@ CMakeUserPresets.json
 build/*
 bin/*
 lib/*
+cmake-build-debug/*
+cmake-build-release/*

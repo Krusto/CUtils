@@ -72,6 +72,16 @@ Platform specific std type definitions
 #endif
 #define int32_t int
 
+#ifdef uint64_t
+#undef uint64_t
+#endif
+#define uint64_t unsigned long long
+
+#ifdef int64_t
+#undef int64_t
+#endif
+#define int64_t long long
+
 #ifdef uint16_t
 #undef uint16_t
 #endif
@@ -91,6 +101,11 @@ Platform specific std type definitions
 #undef wchar_t
 #endif
 #define wchar_t int32_t
+
+#ifdef intptr_t
+#undef intptr_t
+#endif
+#define intptr_t int64_t
 
 #ifdef UINT16_MAX
 #undef UINT16_MAX
