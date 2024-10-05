@@ -54,6 +54,9 @@ Platform specific std type definitions
 #endif
 #define FALSE 1u == 0u
 
+#ifndef USE_SPECIFIC_STD_TYPES
+#include <stdint.h>
+#else
 #ifdef uint8_t
 #undef uint8_t
 #endif
@@ -111,5 +114,5 @@ Platform specific std type definitions
 #undef UINT16_MAX
 #endif
 #define UINT16_MAX ((uint16_t) -1)
-
+#endif
 #endif//STDTYPES_HEADER

@@ -51,12 +51,12 @@ Macro Definitions
     #define LOG( ... ) printf( __VA_ARGS__ )
     #define LOG_ERROR( ... )                                                                                               \
         LOG( "Error: " );                                                                                                  \
-        printf( __VA_ARGS__ )
+        LOG( __VA_ARGS__ )
     
     #ifdef CUTILS_VERBOSE
         #define LOG_INFO( ... )                                                                                                \
             LOG( "Info: " );                                                                                                   \
-            printf( __VA_ARGS__ )
+            LOG( __VA_ARGS__ )
     #else   
         #define LOG_INFO( ... )
     #endif
@@ -65,14 +65,38 @@ Macro Definitions
     #else
         #define LOG_DEBUG(...)\
             LOG("Debug: ");\
-            printf(__VA_ARGS__)
+            LOG(__VA_ARGS__)
+    #endif
+
+    #define WLOG( ... ) wprintf( __VA_ARGS__ )
+    #define WLOG_ERROR( ... )                                                                                               \
+        WLOG( "Error: " );                                                                                                  \
+        WLOG( __VA_ARGS__ )
+    
+    #ifdef CUTILS_VERBOSE
+        #define WLOG_INFO( ... )                                                                                                \
+            WLOG( "Info: " );                                                                                                   \
+            WLOG( __VA_ARGS__ )
+    #else   
+        #define WLOG_INFO( ... )
+    #endif
+    #ifdef NDEBUG
+        #define WLOG_DEBUG(...)
+    #else
+        #define WLOG_DEBUG(...)\
+            WLOG("Debug: ");\
+            WLOG(__VA_ARGS__)
     #endif
 
 #else
     #define LOG( ... )
     #define LOG_INFO( ... )
     #define LOG_DEBUG(...)
-
+    #define LOG_ERROR(...)
+    #define WLOG( ... )
+    #define WLOG_INFO( ... )
+    #define WLOG_DEBUG(...)
+    #define WLOG_ERROR(...)
 #endif
 // clang-format on
 /***********************************************************************************************************************
