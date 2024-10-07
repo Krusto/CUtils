@@ -51,12 +51,14 @@ Macro Definitions
 #ifndef NO_STD_MALLOC
 #define CMEMCPY(dest, p, size) memcpy(dest, p, size)
 #define CMALLOC(size) malloc(size)
+#define CCALLOC(num, size) calloc(num, size)
 #define CREALLOC(p, new_size) realloc(p, new_size)
 #define CFREE(p, size) free(p)
 #define CMEMSET(p, value, size) memset(p, value, size)
 #else
 #define CMEMCPY(dest, p, size)
 #define CMALLOC(size)
+#define CCALLOC(size)
 #define CREALLOC(p, new_size)
 #define CFREE(p, size)
 #define CMEMSET(p, value, size)
