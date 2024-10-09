@@ -105,10 +105,12 @@ static BOOL cstr_contains_utf8_bom(const int8_t* str);
 static BOOL cstr_is_utf8(const int8_t* str);
 static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
 static BOOL utf8_is_continuation_byte(int8_t byte);
+static BOOL utf8_is_continuation_byte2(int8_t byte);
+static BOOL utf8_is_continuation_byte3(int8_t byte);
 static BOOL utf8_is_byte_ascii(int8_t byte);
 static uint8_t utf8_get_char_length(int8_t byte);
-static void utf8_go_next_char(const int8_t* strfer, uint32_t length, uint32_t* currentIndexPtr);
-static void utf8_go_prev_char(const int8_t* strfer, uint32_t length, uint32_t* currentIndexPtr);
+static void utf8_go_next_char(const int8_t* data, uint32_t length, uint32_t* currentIndexPtr);
+static void utf8_go_prev_char(const int8_t* data, uint32_t length, uint32_t* currentIndexPtr);
 static wchar_t utf8_to_unicode(const int8_t* utf8_data);
 
 static void str_arr_push_back(DArrayT* arr, DStringT* str);
@@ -120,12 +122,15 @@ static DStringT* str_insert_dstring(DStringT* str, DStringT* another, size_t ind
 /***********************************************************************************************************************
 Static functions implementation
 ***********************************************************************************************************************/
-static DStringT* str_arr_get(DArrayT* arr, size_t index) { return ((DStringT**) (arr->data))[index]; }
+inline static DStringT* str_arr_get(DArrayT* arr, size_t index) { return ((DStringT**) (arr->data))[index]; }
 
 inline static void str_arr_push_back(DArrayT* arr, DStringT* str)
 {
-    darr_resize(arr, arr->length + 1);
-    ((DStringT**) arr->data)[arr->length - 1] = str;
+    if (str != NULL)
+    {
+        darr_resize(arr, arr->length + 1);
+        ((DStringT**) arr->data)[arr->length - 1] = str;
+    }
 }
 
 inline static int8_t str_get(DStringT* str, size_t index) { return str->data[index]; }
@@ -158,7 +163,7 @@ inline static DStringT* str_create_empty(size_t size)
             result->data = NULL;
 
             int8_t* memory = (int8_t*) CCALLOC(size + 1, sizeof(int8_t));
-            if (NULL == memory) { LOG_ERROR("Can not allocate dynamic string strfer!\n"); }
+            if (NULL == memory) { LOG_ERROR("Can not allocate dynamic string data!\n"); }
             else
             {
                 memory[size] = '\0';
@@ -283,7 +288,7 @@ inline static BOOL utf8_is_continuation_byte2(int8_t byte) { return (byte & UNIC
 
 inline static BOOL utf8_is_continuation_byte3(int8_t byte) { return (byte & UNICODE_UTF8_BYTE3_MASK) == 0x80; }
 
-inline static BOOL utf8_is_byte_ascii(int8_t byte) { return byte <= UNICODE_UTF8_ASCII_RANGE_MAX; }
+inline static BOOL utf8_is_byte_ascii(int8_t byte) { return byte <= UNICODE_UTF8_ASCII_RANGE_MAX && byte >= 0; }
 
 inline static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length)
 {
@@ -388,15 +393,15 @@ inline static uint8_t utf8_get_char_length(int8_t byte)
     return count;
 }
 
-inline static void utf8_go_next_char(const int8_t* strfer, uint32_t length, uint32_t* currentIndexPtr)
+inline static void utf8_go_next_char(const int8_t* data, uint32_t length, uint32_t* currentIndexPtr)
 {
     uint32_t currentIndex = *currentIndexPtr;
 
-    uint32_t newOffset = currentIndex + utf8_get_char_length(strfer[currentIndex]);
+    uint32_t newOffset = currentIndex + utf8_get_char_length(data[currentIndex]);
     if (newOffset < length) { (*currentIndexPtr) = newOffset; };
 }
 
-inline static void utf8_go_prev_char(const int8_t* strfer, uint32_t length, uint32_t* currentIndexPtr) {}
+inline static void utf8_go_prev_char(const int8_t* data, uint32_t length, uint32_t* currentIndexPtr) {}
 
 inline static wchar_t utf8_to_unicode(const int8_t* utf8_data)
 {
@@ -545,7 +550,7 @@ inline static void str_arr_destroy(DArrayT* str)
 {
     if (NULL != str)
     {
-        for (size_t i = 0; i < darr_length(str); i++) { str_destroy(str_arr_get(str, i)); }
+        for (size_t i = 0; i < darr_length(str); i++) { str_destroy((DStringT*) str->data[i]); }
         if (str->data) { CFREE(str->data, str->length); }
         CFREE((void*) str, DARRAY_HEADER_SIZE + sizeof(int8_t*));
     }
