@@ -47,6 +47,30 @@ Includes
 Macro Definitions
 ***********************************************************************************************************************/
 
+/**
+ * @brief Logging macros
+ *
+ * The macros here are used for logging messages. By default, they are implemented
+ * using the standard C library functions `printf` and `wprintf`. However, if the
+ * `NO_STD_LOG` macro is defined, they are defined as empty macros. This allows the
+ * macros to be used without incurring the overhead of the standard library
+ * functions when they are not needed.
+ *
+ * The macros are:
+ *
+ * - `LOG( ... )`: Logs the message using `printf`
+ * - `LOG_INFO( ... )`: Logs the message using `printf`, only if `CUTILS_VERBOSE`
+ *   is defined
+ * - `LOG_DEBUG( ... )`: Logs the message using `printf`, only if `NDEBUG` is not
+ *   defined
+ * - `LOG_ERROR( ... )`: Logs the message using `printf`
+ * - `WLOG( ... )`: Logs the message using `wprintf`
+ * - `WLOG_INFO( ... )`: Logs the message using `wprintf`, only if `CUTILS_VERBOSE`
+ *   is defined
+ * - `WLOG_DEBUG( ... )`: Logs the message using `wprintf`, only if `NDEBUG` is not
+ *   defined
+ * - `WLOG_ERROR( ... )`: Logs the message using `wprintf`
+ */
 // clang-format off
 #ifndef NO_STD_LOG
     #define LOG( ... ) printf( __VA_ARGS__ )
@@ -100,8 +124,5 @@ Macro Definitions
     #define WLOG_ERROR(...)
 #endif
 // clang-format on
-/***********************************************************************************************************************
-Static functions implementation
-***********************************************************************************************************************/
 
 #endif// CLOG_HEADER

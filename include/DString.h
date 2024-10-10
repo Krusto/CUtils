@@ -53,23 +53,56 @@ Includes
 /***********************************************************************************************************************
 Macro Definitions
 ***********************************************************************************************************************/
-
+/**
+ * @brief Initial capacity of the dynamic string
+ */
 #define DSTRING_INITIAL_CAPACITY 1u
+/**
+ * @brief Resize factor of the dynamic string
+ */
 #define DSTRING_RESIZE_FACTOR 2u
 
+/**
+ * @brief Length of the null termination in bytes
+ */
 #define DSTRING_NULL_TERMINATION_LENGTH 1u
+/**
+ * @brief Null terminator character
+ */
 #define DSTRING_NULL_TERMINATOR '\0';
 
+/**
+ * @brief Maximum ASCII value for a single byte in UTF-8
+ */
 #define UNICODE_UTF8_ASCII_RANGE_MAX 0x7F
+/**
+ * @brief Mask for a single byte in UTF-8
+ */
 #define UNICODE_UTF8_BYTE1_MASK 0xC0
+/**
+ * @brief Mask for a two byte UTF-8 character
+ */
 #define UNICODE_UTF8_BYTE2_MASK 0xE0
+/**
+ * @brief Mask for a three byte UTF-8 character
+ */
 #define UNICODE_UTF8_BYTE3_MASK 0xF0
+/**
+ * @brief Mask for a four byte UTF-8 character
+ */
 #define UNICODE_UTF8_BYTE4_MASK 0xF8
 
 /***********************************************************************************************************************
 Type definitions
 ***********************************************************************************************************************/
-
+/**
+ * @struct DStringT
+ * @brief Dynamic String Type
+ *
+ * @var length is the number of bytes in the string without the NULL termination.
+ * @var capacity is the maximum number of bytes that can be stored in the string.
+ * @var data is a pointer to the first character of the string.
+ */
 typedef struct {
     size_t length;
     size_t capacity;
@@ -79,44 +112,287 @@ typedef struct {
 /***********************************************************************************************************************
 Static functions declaration
 ***********************************************************************************************************************/
+/**
+ * @brief Creates empty dynamic string with length = size
+ * 
+ * @param size is the length of the empty string
+ * 
+ * @return DStringT*: String pointer to the dynamic string
+ */
 static DStringT* str_create_empty(size_t size);
+/**
+ * @brief Creates dynamic string from standard c string
+ *
+ * @param str Standard C String buffer ptr
+ * @param size Length in bytes of the input string
+ * @return DStringT*: String pointer to the dynamic string
+ */
 static DStringT* str_create(const int8_t* str, size_t size);
+/**
+ * @brief Destroys and frees the memory of the dynamic string
+ * 
+ *
+ * @param str to be destroyed
+ */
 static void str_destroy(DStringT* str);
+/**
+ * @brief Creates and array of Dynamic Strings
+ * 
+ *
+ * @return DArrayT*: dynamic array of dynamic strings
+ */
 static DArrayT* str_arr_create(void);
-static void str_arr_destroy(DArrayT* str);
-
+/**
+ * @brief Destroys and frees the memory of the dynamic array of dynamic strings
+ *
+ * @param str: array of strings
+ */
+static void str_arr_destroy(DArrayT* strArray);
+/**
+ * @brief Returns character at index
+ *
+ * @param str: input string
+ * @param index: index of character in str
+ * @return int8_t: char at index
+ */
 static int8_t str_get(DStringT* str, size_t index);
+/**
+ * @brief Returns character pointer of char at index
+ * 
+ * @param str: input string
+ * @param index: index of char
+ * @return int8_t*: address of character
+ */
 static int8_t* str_get_ptr(DStringT* str, size_t index);
+/**
+ * @brief Returns the first char in dynamic string
+ * 
+ * @param str: input string
+ * @return int8_t: first character
+ */
 static int8_t str_front(DStringT* str);
+/**
+ * @brief Returns the first char pointer in dynamic string
+ * 
+ * @param str: input string
+ * @return int8_t: first character pointer
+ */
 static int8_t* str_front_ptr(DStringT* str);
+/**
+ * @brief Returns the last char in dynamic string
+ * 
+ * @param str: input string
+ * @return int8_t: last character
+ */
 static int8_t str_back(DStringT* str);
+/**
+ * @brief Returns the last char pointer in dynamic string
+ * 
+ * @param str: input string
+ * @return int8_t: last character pointer
+ */
 static int8_t* str_back_ptr(DStringT* str);
+/**
+ * @brief Checks if dynamic string is empty
+ * 
+ * @param str input dynamic string
+ * 
+ * @return BOOL: if string is empty
+ */
 static BOOL is_str_empty(DStringT* str);
+/**
+ * @brief Resizes dynamic string to new length
+ * 
+ * @param str: dynamic string
+ * @param newLength: new length of dynamic string
+ */
 static void str_resize(DStringT* str, size_t newLength);
+/**
+ * @brief Removes element at index from dynamic string
+ *
+ * @param str: input dynamic string
+ * @param index: index of element to be removed
+ */
 static void str_erase(DStringT* str, size_t index);
+/**
+ * @brief Inserts element at index in dynamic string
+ * 
+ * @param str: input dynamic string
+ * @param index: index to insert element
+ * @param element: element to be inserted
+ */
 static void str_insert(DStringT* str, uint32_t index, int8_t* element);
-static void str_shring_to_fit(DStringT* str);
+/**
+ * @brief Changes capacity of dynamic string
+ * 
+ * @param str: input dynamic string
+ * @param newCapacity: new capacity
+ */
 static void str_reserve(DStringT* str, size_t newCapacity);
+/**
+ * @brief Shrinks dynamic string to its size
+ * 
+ * @param str: input dynamic string
+ */
+static void str_shring_to_fit(DStringT* str);
+/**
+ * @brief Returns length of C string
+ * 
+ * @param str: input C string
+ * 
+ * @return size_t: length of C string
+ */
 static size_t cstr_length(const int8_t* str);
 
+/**
+ * @brief Checks if dynamic string is valid UTF-8
+ * 
+ * @param str: input dynamic string
+ * 
+ * @return BOOL: if dynamic string is valid UTF-8
+ */
 static BOOL str_is_valid_utf8(DStringT* str);
+/**
+ * @brief Returns length of UTF-8 string
+ * 
+ * @param str: input UTF-8 string
+ * 
+ * @return size_t: length of UTF-8 string
+ */
 static size_t cstr_utf8_length(const int8_t* str);
+/**
+ * @brief Checks if C string contains UTF-8 BOM
+ * 
+ * @param str: input C string
+ * 
+ * @return BOOL: if C string contains UTF-8 BOM
+ */
 static BOOL cstr_contains_utf8_bom(const int8_t* str);
+/**
+ * @brief Checks if C string is UTF-8
+ * 
+ * @param str: input C string
+ * 
+ * @return BOOL: if C string is UTF-8
+ */
 static BOOL cstr_is_utf8(const int8_t* str);
+/**
+ * @brief Checks if UTF-8 string is valid UTF-8
+ * 
+ * @param str: input UTF-8 string
+ * @param length: length of UTF-8 string
+ * 
+ * @return BOOL: if UTF-8 string is valid UTF-8
+ */
 static BOOL cstr_is_valid_utf8(const int8_t* input, size_t length);
+/**
+ * @brief Checks if byte is a continuation byte in UTF-8
+ * 
+ * @param byte: input byte
+ * 
+ * @return BOOL: if byte is a continuation byte
+ */
 static BOOL utf8_is_continuation_byte(int8_t byte);
+/**
+ * @brief Checks if byte is a continuation byte of length 2 in UTF-8
+ * 
+ * @param byte: input byte
+ * 
+ * @return BOOL: if byte is a continuation byte of length 2
+ */
 static BOOL utf8_is_continuation_byte2(int8_t byte);
+/**
+ * @brief Checks if byte is a continuation byte of length 3 in UTF-8
+ * 
+ * @param byte: input byte
+ * 
+ * @return BOOL: if byte is a continuation byte of length 3
+ */
 static BOOL utf8_is_continuation_byte3(int8_t byte);
+/**
+ * @brief Checks if byte is ASCII in UTF-8
+ * 
+ * @param byte: input byte
+ * 
+ * @return BOOL: if byte is ASCII
+ */
 static BOOL utf8_is_byte_ascii(int8_t byte);
+/**
+ * @brief Returns length of a UTF-8 character
+ * 
+ * @param byte: first byte of character
+ * 
+ * @return uint8_t: length of UTF-8 character
+ */
 static uint8_t utf8_get_char_length(int8_t byte);
+/**
+ * @brief Goes to the next UTF-8 character in string
+ * 
+ * @param data: input string
+ * @param length: length of string
+ * @param currentIndexPtr: pointer to current index
+ */
 static void utf8_go_next_char(const int8_t* data, uint32_t length, uint32_t* currentIndexPtr);
+/**
+ * @brief Goes to the previous UTF-8 character in string
+ * 
+ * @param data: input string
+ * @param length: length of string
+ * @param currentIndexPtr: pointer to current index
+ */
 static void utf8_go_prev_char(const int8_t* data, uint32_t length, uint32_t* currentIndexPtr);
+/**
+ * @brief Converts UTF-8 string to wide character
+ * 
+ * @param utf8_data: input UTF-8 string
+ * 
+ * @return wchar_t: wide character
+ */
 static wchar_t utf8_to_unicode(const int8_t* utf8_data);
 
+/**
+ * @brief Appends dynamic string to dynamic string array
+ *
+ * @param arr: dynamic string array
+ * @param str: dynamic string to be appended
+ */
 static void str_arr_push_back(DArrayT* arr, DStringT* str);
+/**
+ * @brief Returns dynamic string at index from dynamic string array
+ *
+ * @param arr: dynamic string array
+ * @param index: index of dynamic string
+ *
+ * @return DStringT*: dynamic string at index
+ */
 static DStringT* str_arr_get(DArrayT* arr, size_t index);
+/**
+ * @brief Appends standard C string to dynamic string
+ *
+ * @param str: dynamic string
+ * @param cstr: standard C string
+ *
+ * @return DStringT*: dynamic string after appending
+ */
 static DStringT* str_append_cstring(DStringT* str, const int8_t* cstr);
+/**
+ * @brief Appends dynamic string to dynamic string
+ *
+ * @param str: dynamic string
+ * @param another: dynamic string to be appended
+ *
+ * @return DStringT*: dynamic string after appending
+ */
 static DStringT* str_append_dstring(DStringT* str, DStringT* another);
+/**
+ * @brief Inserts dynamic string at index in dynamic string
+ *
+ * @param str: dynamic string
+ * @param another: dynamic string to be inserted
+ * @param index: index of insertion
+ *
+ * @return DStringT*: dynamic string after inserting
+ */
 static DStringT* str_insert_dstring(DStringT* str, DStringT* another, size_t index);
 
 /***********************************************************************************************************************
@@ -546,13 +822,13 @@ inline static DArrayT* str_arr_create(void)
     return result;
 }
 
-inline static void str_arr_destroy(DArrayT* str)
+inline static void str_arr_destroy(DArrayT* strArray)
 {
-    if (NULL != str)
+    if (NULL != strArray)
     {
-        for (size_t i = 0; i < darr_length(str); i++) { str_destroy((DStringT*) str->data[i]); }
-        if (str->data) { CFREE(str->data, str->length); }
-        CFREE((void*) str, DARRAY_HEADER_SIZE + sizeof(int8_t*));
+        for (size_t i = 0; i < darr_length(strArray); i++) { str_destroy((DStringT*) strArray->data[i]); }
+        if (strArray->data) { CFREE(strArray->data, strArray->length); }
+        CFREE((void*) strArray, DARRAY_HEADER_SIZE + sizeof(int8_t*));
     }
 }
 

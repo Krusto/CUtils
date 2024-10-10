@@ -48,6 +48,16 @@ Includes
 /***********************************************************************************************************************
 Type definitions
 ***********************************************************************************************************************/
+/**
+ * @struct CStringViewT
+ * @brief Represents a constant string view.
+ *
+ * @var data
+ *      The data of the string view.
+ *
+ * @var length
+ *      The length of the string view.
+ */
 typedef struct {
     const int8_t* data;
     size_t length;
@@ -56,12 +66,70 @@ typedef struct {
 /***********************************************************************************************************************
 Function declarations
 ***********************************************************************************************************************/
+/**
+ * @brief Create a constant string view from a null terminated string.
+ *
+ * @param[in] str The null terminated string.
+ *
+ * @return The constant string view.
+ */
 static CStringViewT string_view_create(const int8_t* str);
+
+/**
+ * @brief Create a constant string view from a dynamic string.
+ *
+ * @param[in] str The dynamic string.
+ *
+ * @return The constant string view.
+ */
 static CStringViewT string_view_create_d(DStringT* str);
+
+/**
+ * @brief Compare a constant string view with a dynamic string.
+ *
+ * @param[in] sv1 The constant string view.
+ * @param[in] dstring The dynamic string.
+ *
+ * @return True if the constant string view is equal to the dynamic string, false otherwise.
+ */
 static BOOL string_view_cmp_d(CStringViewT sv1, DStringT* dstring);
+
+/**
+ * @brief Compare two constant string views.
+ *
+ * @param[in] sv1 The first constant string view.
+ * @param[in] sv2 The second constant string view.
+ *
+ * @return True if the two constant string views are equal, false otherwise.
+ */
 static BOOL string_view_cmp(CStringViewT sv1, CStringViewT sv2);
+
+/**
+ * @brief Get a substring of a constant string view.
+ *
+ * @param[in] str The constant string view.
+ * @param[in] index The index of the substring.
+ * @param[in] count The number of characters to copy.
+ *
+ * @return The substring.
+ */
 static CStringViewT string_view_substr(CStringViewT* str, size_t index, size_t count);
+
+/**
+ * @brief Convert a constant string view to a dynamic string.
+ *
+ * @param[in] str The constant string view.
+ *
+ * @return The dynamic string.
+ */
 static DStringT* string_view_to_string(CStringViewT* str);
+
+/**
+ * @brief Append a constant string view to a dynamic string.
+ *
+ * @param[in] str The dynamic string.
+ * @param[in] str_view The constant string view.
+ */
 static void str_append_string_view(DStringT* str, CStringViewT str_view);
 
 /***********************************************************************************************************************

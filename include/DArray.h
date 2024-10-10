@@ -53,6 +53,19 @@ Macro Definitions
 Type definitions
 ***********************************************************************************************************************/
 
+/**
+ * @struct DArrayT
+ * @brief A dynamic array.
+ * 
+ * A dynamic array is a type of array that can grow in size as elements are added
+ * to it. This is useful for storing collections of data when the number of
+ * elements is not known until runtime.
+ * 
+ * @var length The number of elements in the dynamic array.
+ * @var capacity The maximum number of elements that the dynamic array can hold.
+ * @var elementSize The size of each element in the dynamic array.
+ * @var data The data of the dynamic array.
+ */
 typedef struct {
     size_t length;
     size_t capacity;
@@ -60,60 +73,392 @@ typedef struct {
     int8_t* data;
 } DArrayT;
 
+/**
+ * @typedef DArrayU32T
+ * @brief A dynamic array of uint32_t.
+ */
 typedef DArrayT DArrayU32T;
+
+/**
+ * @typedef DArrayI32T
+ * @brief A dynamic array of int32_t.
+ */
 typedef DArrayT DArrayI32T;
+
+/**
+ * @typedef DArrayU16T
+ * @brief A dynamic array of uint16_t.
+ */
 typedef DArrayT DArrayU16T;
+
+/**
+ * @typedef DArrayI16T
+ * @brief A dynamic array of int16_t.
+ */
 typedef DArrayT DArrayI16T;
+
+/**
+ * @typedef DArrayU8T
+ * @brief A dynamic array of uint8_t.
+ */
 typedef DArrayT DArrayU8T;
+
+/**
+ * @typedef DArrayI8T
+ * @brief A dynamic array of int8_t.
+ */
 typedef DArrayT DArrayI8T;
 
 /***********************************************************************************************************************
 Static functions declaration
 ***********************************************************************************************************************/
+/**
+ * @brief Destroy a dynamic array.
+ * @param darr[in] The dynamic array to destroy.
+ * @return None.
+ */
 static void darr_destroy(DArrayT* darr);
+
+/**
+ * @brief Create a dynamic array of uint32_t.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayU32T* darr_create_u32();
+
+/**
+ * @brief Create a dynamic array of int32_t.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayI32T* darr_create_i32();
+
+/**
+ * @brief Create a dynamic array of uint16_t.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayU16T* darr_create_u16();
+
+/**
+ * @brief Create a dynamic array of int16_t.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayI16T* darr_create_i16();
+
+/**
+ * @brief Create a dynamic array of uint8_t.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayU8T* darr_create_u8();
+
+/**
+ * @brief Create a dynamic array of int8_t.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayI8T* darr_create_i8();
+
+/**
+ * @brief Create a dynamic array of any type.
+ * @param typeSize[in] The size of the type to be stored in the array.
+ * @return A pointer to the new dynamic array.
+ */
 static DArrayT* darr_create_generic(size_t typeSize);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_u32(DArrayU32T* darr, uint32_t value);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_i32(DArrayI32T* darr, int32_t value);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_u16(DArrayU16T* darr, uint16_t value);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_i16(DArrayI16T* darr, int16_t value);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_u8(DArrayU8T* darr, uint8_t value);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_i8(DArrayI8T* darr, int8_t value);
+
+/**
+ * @brief Push a new element to the end of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param value[in] The value to push.
+ * @return None.
+ */
 static void darr_push_generic(DArrayT* darr, void* value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_u32(DArrayU32T* darr, size_t index, uint32_t value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_i32(DArrayI32T* darr, size_t index, int32_t value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_u16(DArrayU16T* darr, size_t index, uint16_t value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_i16(DArrayI16T* darr, size_t index, int16_t value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_u8(DArrayU8T* darr, size_t index, uint8_t value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_i8(DArrayI8T* darr, size_t index, int8_t value);
+
+/**
+ * @brief Insert a new element at the given index in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to insert.
+ * @param value[in] The value to insert.
+ * @return None.
+ */
 static void darr_insert_generic(DArrayT* darr, size_t index, void* valuePtr);
+
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
 static uint32_t darr_get_u32(DArrayU32T* darr, size_t index);
+
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
 static int32_t darr_get_i32(DArrayI32T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static uint32_t* darr_get_u32_ptr(DArrayU32T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static int32_t* darr_get_i32_ptr(DArrayI32T* darr, size_t index);
+
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
 static uint16_t darr_get_u16(DArrayU16T* darr, size_t index);
+
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
 static int16_t darr_get_i16(DArrayI16T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static uint16_t* darr_get_u16_ptr(DArrayU16T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static int16_t* darr_get_i16_ptr(DArrayI16T* darr, size_t index);
+
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
 static uint8_t darr_get_u8(DArrayU8T* darr, size_t index);
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
+static uint8_t darr_get_u8(DArrayU8T* darr, size_t index);
+
+/**
+ * @brief Get a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index.
+ */
 static int8_t darr_get_i8(DArrayI8T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static uint8_t* darr_get_u8_ptr(DArrayU8T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static int8_t* darr_get_i8_ptr(DArrayI8T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index.
+ */
 static void* darr_get_ptr(DArrayT* darr, size_t index);
+
+/**
+ * @brief Resize the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param newLength[in] The new length of the dynamic array.
+ */
 static void darr_resize(DArrayT* darr, size_t newLength);
+
+/**
+ * @brief Get a pointer to the first value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @return A pointer to the first value in the dynamic array.
+ */
 static void* darr_front_ptr(DArrayT* darr);
+
+/**
+ * @brief Get a pointer to the last value in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @return A pointer to the last value in the dynamic array.
+ */
 static void* darr_back_ptr(DArrayT* darr);
+
+/**
+ * @brief Check if the dynamic array is empty.
+ * @param darr[in] The dynamic array.
+ * @return TRUE if the dynamic array is empty, FALSE otherwise.
+ */
 static BOOL darr_is_empty(DArrayT* darr);
+
+/**
+ * @brief Get the length of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @return The length of the dynamic array.
+ */
 static size_t darr_length(DArrayT* darr);
+
+/**
+ * @brief Get the capacity of the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @return The capacity of the dynamic array.
+ */
 static size_t darr_capacity(DArrayT* darr);
+
+/**
+ * @brief Erase an element from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to erase.
+ */
 static void darr_erase(DArrayT* darr, size_t index);
+
+/**
+ * @brief Shrink the capacity of the dynamic array to its length.
+ * @param darr[in] The dynamic array.
+ */
 static void darr_shrink_to_fit(DArrayT* darr);
+
+/**
+ * @brief Reserve space for a number of elements in the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @param newCapacity[in] The new capacity of the dynamic array.
+ */
 static void darr_reserve(DArrayT* darr, size_t newCapacity);
+
+/**
+ * @brief Pop a value from the dynamic array.
+ * @param darr[in] The dynamic array.
+ * @return A pointer to the popped value.
+ */
 static void* darr_pop(DArrayT* darr);
 
 /***********************************************************************************************************************
