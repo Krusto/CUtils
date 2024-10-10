@@ -46,7 +46,18 @@ Includes
 Macro Definitions
 ***********************************************************************************************************************/
 
+/**
+ * @def DARRAY_INITIAL_CAPACITY
+ * @brief The initial capacity of a dynamic array.
+ */
 #define DARRAY_INITIAL_CAPACITY 1u
+
+/**
+ * @def DARRAY_RESIZE_FACTOR
+ * @brief The resize factor of a dynamic array.
+ *
+ * If the length of the array exceeds the capacity, the capacity is doubled.
+ */
 #define DARRAY_RESIZE_FACTOR 2u
 
 /***********************************************************************************************************************
