@@ -301,12 +301,35 @@ static void darr_insert_generic(DArrayT* darr, size_t index, void* valuePtr);
 static uint32_t darr_get_u32(DArrayU32T* darr, size_t index);
 
 /**
+ * @brief Get a value from the dynamic array, safely.
+ *
+ * This function is like darr_get_u32, but it will return 0 if the index is out
+ * of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index, or 0 if the index is out of bounds.
+ */
+static uint32_t darr_get_u32_safe(DArrayU32T* darr, size_t index);
+
+/**
  * @brief Get a value from the dynamic array.
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
  * @return The value at the given index.
  */
 static int32_t darr_get_i32(DArrayI32T* darr, size_t index);
+/**
+ * @brief Get a value from the dynamic array, safely.
+ *
+ * This function is like darr_get_i32, but it will return 0 if the index is out
+ * of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index, or 0 if the index is out of bounds.
+ */
+static int32_t darr_get_i32_safe(DArrayI32T* darr, size_t index);
 
 /**
  * @brief Get a pointer to a value in the dynamic array.
@@ -317,12 +340,38 @@ static int32_t darr_get_i32(DArrayI32T* darr, size_t index);
 static uint32_t* darr_get_u32_ptr(DArrayU32T* darr, size_t index);
 
 /**
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_u32_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
+ */
+static uint32_t* darr_get_u32_ptr_safe(DArrayU32T* darr, size_t index);
+
+/**
  * @brief Get a pointer to a value in the dynamic array.
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
  * @return A pointer to the value at the given index.
  */
 static int32_t* darr_get_i32_ptr(DArrayI32T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_i32_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
+ */
+static int32_t* darr_get_i32_ptr_safe(DArrayI32T* darr, size_t index);
 
 /**
  * @brief Get a value from the dynamic array.
@@ -333,12 +382,36 @@ static int32_t* darr_get_i32_ptr(DArrayI32T* darr, size_t index);
 static uint16_t darr_get_u16(DArrayU16T* darr, size_t index);
 
 /**
+ * @brief Get a value from the dynamic array, safely.
+ *
+ * This function is like darr_get_u16, but it will return 0 if the index is out
+ * of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index, or 0 if the index is out of bounds.
+ */
+static uint16_t darr_get_u16_safe(DArrayU16T* darr, size_t index);
+
+/**
  * @brief Get a value from the dynamic array.
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
  * @return The value at the given index.
  */
 static int16_t darr_get_i16(DArrayI16T* darr, size_t index);
+
+/**
+ * @brief Get a value from the dynamic array, safely.
+ *
+ * This function is like darr_get_i16, but it will return 0 if the index is out
+ * of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index, or 0 if the index is out of bounds.
+ */
+static int16_t darr_get_i16_safe(DArrayI16T* darr, size_t index);
 
 /**
  * @brief Get a pointer to a value in the dynamic array.
@@ -349,6 +422,19 @@ static int16_t darr_get_i16(DArrayI16T* darr, size_t index);
 static uint16_t* darr_get_u16_ptr(DArrayU16T* darr, size_t index);
 
 /**
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_u16_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
+ */
+static uint16_t* darr_get_u16_ptr_safe(DArrayU16T* darr, size_t index);
+
+/**
  * @brief Get a pointer to a value in the dynamic array.
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
@@ -357,12 +443,18 @@ static uint16_t* darr_get_u16_ptr(DArrayU16T* darr, size_t index);
 static int16_t* darr_get_i16_ptr(DArrayI16T* darr, size_t index);
 
 /**
- * @brief Get a value from the dynamic array.
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_i16_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
- * @return The value at the given index.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
  */
-static uint8_t darr_get_u8(DArrayU8T* darr, size_t index);
+static int16_t* darr_get_i16_ptr_safe(DArrayI16T* darr, size_t index);
+
 /**
  * @brief Get a value from the dynamic array.
  * @param darr[in] The dynamic array.
@@ -380,12 +472,37 @@ static uint8_t darr_get_u8(DArrayU8T* darr, size_t index);
 static int8_t darr_get_i8(DArrayI8T* darr, size_t index);
 
 /**
+ * @brief Get a value from the dynamic array, safely.
+ *
+ * This function is like darr_get_i8, but it will return 0 if the index is out
+ * of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return The value at the given index, or 0 if the index is out of bounds.
+ */
+static int8_t darr_get_i8_safe(DArrayI8T* darr, size_t index);
+
+/**
  * @brief Get a pointer to a value in the dynamic array.
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
  * @return A pointer to the value at the given index.
  */
 static uint8_t* darr_get_u8_ptr(DArrayU8T* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_u8_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
+ */
+static uint8_t* darr_get_u8_ptr_safe(DArrayU8T* darr, size_t index);
 
 /**
  * @brief Get a pointer to a value in the dynamic array.
@@ -396,12 +513,38 @@ static uint8_t* darr_get_u8_ptr(DArrayU8T* darr, size_t index);
 static int8_t* darr_get_i8_ptr(DArrayI8T* darr, size_t index);
 
 /**
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_i8_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
+ */
+static int8_t* darr_get_i8_ptr_safe(DArrayI8T* darr, size_t index);
+
+/**
  * @brief Get a pointer to a value in the dynamic array.
  * @param darr[in] The dynamic array.
  * @param index[in] The index of the element to get.
  * @return A pointer to the value at the given index.
  */
 static void* darr_get_ptr(DArrayT* darr, size_t index);
+
+/**
+ * @brief Get a pointer to a value in the dynamic array, safely.
+ *
+ * This function is like darr_get_ptr, but it will return NULL if the index
+ * is out of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to get.
+ * @return A pointer to the value at the given index, or NULL if the index is
+ * out of bounds.
+ */
+static void* darr_get_ptr_safe(DArrayT* darr, size_t index);
 
 /**
  * @brief Resize the dynamic array.
@@ -418,11 +561,35 @@ static void darr_resize(DArrayT* darr, size_t newLength);
 static void* darr_front_ptr(DArrayT* darr);
 
 /**
+ * @brief Get a pointer to the first value in the dynamic array, safely.
+ *
+ * This function is like darr_front_ptr, but it will return NULL if the dynamic
+ * array is empty.
+ *
+ * @param darr[in] The dynamic array.
+ * @return A pointer to the first value in the dynamic array, or NULL if the
+ * dynamic array is empty.
+ */
+static void* darr_front_ptr_safe(DArrayT* darr);
+
+/**
  * @brief Get a pointer to the last value in the dynamic array.
  * @param darr[in] The dynamic array.
  * @return A pointer to the last value in the dynamic array.
  */
 static void* darr_back_ptr(DArrayT* darr);
+
+/**
+ * @brief Get a pointer to the last value in the dynamic array, safely.
+ *
+ * This function is like darr_back_ptr, but it will return NULL if the dynamic
+ * array is empty.
+ *
+ * @param darr[in] The dynamic array.
+ * @return A pointer to the last value in the dynamic array, or NULL if the
+ * dynamic array is empty.
+ */
+static void* darr_back_ptr_safe(DArrayT* darr);
 
 /**
  * @brief Check if the dynamic array is empty.
@@ -453,6 +620,17 @@ static size_t darr_capacity(DArrayT* darr);
 static void darr_erase(DArrayT* darr, size_t index);
 
 /**
+ * @brief Erase an element from the dynamic array, safely.
+ *
+ * This function is like darr_erase, but it will do nothing if the index is out
+ * of bounds of the dynamic array.
+ *
+ * @param darr[in] The dynamic array.
+ * @param index[in] The index of the element to erase.
+ */
+static void darr_erase_safe(DArrayT* darr, size_t index);
+
+/**
  * @brief Shrink the capacity of the dynamic array to its length.
  * @param darr[in] The dynamic array.
  */
@@ -471,6 +649,16 @@ static void darr_reserve(DArrayT* darr, size_t newCapacity);
  * @return A pointer to the popped value.
  */
 static void* darr_pop(DArrayT* darr);
+/**
+ * @brief Pop a value from the dynamic array, safely.
+ *
+ * This function is like darr_pop, but it will return NULL if the dynamic array
+ * is empty.
+ *
+ * @param darr[in] The dynamic array.
+ * @return A pointer to the popped value, or NULL if the dynamic array is empty.
+ */
+static void* darr_pop_safe(DArrayT* darr);
 
 /***********************************************************************************************************************
 Static functions implementation
@@ -528,18 +716,58 @@ inline static void darr_insert_i8(DArrayI8T* darr, size_t index, int8_t value)
 
 inline static void* darr_get_ptr(DArrayT* darr, size_t index) { return &darr->data[index * darr->elementSize]; }
 
+inline static void* darr_get_ptr_safe(DArrayT* darr, size_t index)
+{
+    void* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_ptr(darr, index); }
+    return result;
+}
+
 inline static uint32_t darr_get_u32(DArrayU32T* darr, size_t index) { return *((uint32_t*) darr_get_ptr(darr, index)); }
 
+inline static uint32_t darr_get_u32_safe(DArrayU32T* darr, size_t index)
+{
+    uint32_t result = 0;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_u32(darr, index); }
+    return result;
+}
+
 inline static int32_t darr_get_i32(DArrayI32T* darr, size_t index) { return *((int32_t*) darr_get_ptr(darr, index)); }
+
+inline static int32_t darr_get_i32_safe(DArrayI32T* darr, size_t index)
+{
+    int32_t result = 0;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_i32(darr, index); }
+    return result;
+}
 
 inline static uint32_t* darr_get_u32_ptr(DArrayU32T* darr, size_t index)
 {
     return ((uint32_t*) darr_get_ptr(darr, index));
 }
 
+inline uint32_t* darr_get_u32_ptr_safe(DArrayU32T* darr, size_t index)
+{
+    uint32_t* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_u32_ptr(darr, index); }
+    return result;
+}
+
 inline static int32_t* darr_get_i32_ptr(DArrayI32T* darr, size_t index)
 {
     return ((int32_t*) darr_get_ptr(darr, index));
+}
+
+inline int32_t* darr_get_i32_ptr_safe(DArrayU32T* darr, size_t index)
+{
+    int32_t* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_i32_ptr(darr, index); }
+    return result;
 }
 
 inline static uint16_t darr_get_u16(DArrayU16T* darr, size_t index) { return *((uint16_t*) darr_get_ptr(darr, index)); }
@@ -556,6 +784,30 @@ inline static int16_t* darr_get_i16_ptr(DArrayI16T* darr, size_t index)
     return ((int16_t*) darr_get_ptr(darr, index));
 }
 
+inline static int16_t darr_get_i16_safe(DArrayI16T* darr, size_t index)
+{
+    int16_t result = 0;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_i16(darr, index); }
+    return result;
+}
+
+inline static uint16_t* darr_get_u16_ptr_safe(DArrayU16T* darr, size_t index)
+{
+    uint16_t* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_u16_ptr(darr, index); }
+    return result;
+}
+
+inline static int16_t* darr_get_i16_ptr_safe(DArrayI16T* darr, size_t index)
+{
+    int16_t* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_i16_ptr(darr, index); }
+    return result;
+}
+
 inline static uint8_t darr_get_u8(DArrayU8T* darr, size_t index) { return *((uint8_t*) darr_get_ptr(darr, index)); }
 
 inline static int8_t darr_get_i8(DArrayI8T* darr, size_t index) { return *((int8_t*) darr_get_ptr(darr, index)); }
@@ -564,9 +816,57 @@ inline static uint8_t* darr_get_u8_ptr(DArrayU8T* darr, size_t index) { return (
 
 inline static int8_t* darr_get_i8_ptr(DArrayI8T* darr, size_t index) { return ((int8_t*) darr_get_ptr(darr, index)); }
 
+inline static uint8_t darr_get_u8_safe(DArrayU8T* darr, size_t index)
+{
+    uint8_t result = 0;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_u8(darr, index); }
+    return result;
+}
+
+inline static int8_t darr_get_i8_safe(DArrayI8T* darr, size_t index)
+{
+    int8_t result = 0;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_i8(darr, index); }
+    return result;
+}
+
+inline static uint8_t* darr_get_u8_ptr_safe(DArrayU8T* darr, size_t index)
+{
+    uint8_t* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_u8_ptr(darr, index); }
+    return result;
+}
+
+inline static int8_t* darr_get_i8_ptr_safe(DArrayI8T* darr, size_t index)
+{
+    int8_t* result = NULL;
+    if (NULL == darr) {}
+    else if (index < darr->length) { result = darr_get_i8_ptr(darr, index); }
+    return result;
+}
+
 inline static void* darr_front_ptr(DArrayT* darr) { return darr_get_ptr(darr, 0); }
 
 inline static void* darr_back_ptr(DArrayT* darr) { return darr_get_ptr(darr, darr->length - 1); }
+
+inline static void* darr_front_ptr_safe(DArrayT* darr)
+{
+    void* result = NULL;
+    if (NULL == darr) {}
+    else if (darr->length > 0) { result = darr_get_ptr(darr, 0); }
+    return result;
+}
+
+inline static void* darr_back_ptr_safe(DArrayT* darr)
+{
+    void* result = NULL;
+    if (NULL == darr) {}
+    else if (darr->length > 0) { result = darr_get_ptr(darr, darr->length - 1); }
+    return result;
+}
 
 inline static void darr_push_u32(DArrayU32T* darr, uint32_t value) { darr_push_generic(darr, &value); }
 
@@ -655,18 +955,21 @@ inline static DArrayT* darr_create_generic(size_t typeSize)
 
 inline static void darr_erase(DArrayT* darr, size_t index)
 {
-    if (index < darr->length)
+    int8_t* resultPtr = NULL;
+    if (NULL != darr->data)
     {
-        int8_t* resultPtr = NULL;
-        if (NULL != darr->data)
-        {
-            void* dest = &(darr->data[index]);
-            void* src = &(darr->data[index + darr->elementSize]);
-            resultPtr = (int8_t*) CMEMCPY(dest, src, (darr->length - index));
-            if (NULL == resultPtr) { LOG_ERROR("Can not copy darray darrfer!\n"); }
-        }
-        if (NULL != resultPtr) { darr->length -= 1; }
+        void* dest = &(darr->data[index]);
+        void* src = &(darr->data[index + darr->elementSize]);
+        resultPtr = (int8_t*) CMEMCPY(dest, src, (darr->length - index));
+        if (NULL == resultPtr) { LOG_ERROR("Can not copy darray darrfer!\n"); }
     }
+    if (NULL != resultPtr) { darr->length -= 1; }
+}
+
+inline static void darr_erase_safe(DArrayT* darr, size_t index)
+{
+    if (NULL == darr) {}
+    else if (index < darr->length) { darr_erase(darr, index); }
 }
 
 inline static void darr_shrink_to_fit(DArrayT* darr)
@@ -705,11 +1008,16 @@ inline static void darr_reserve(DArrayT* darr, size_t newCapacity)
 inline static void* darr_pop(DArrayT* darr)
 {
     void* valuePtr = NULL;
-    if (darr->length > 0)
-    {
-        valuePtr = darr_back_ptr(darr);
-        darr->length -= 1;
-    }
+    valuePtr = darr_back_ptr(darr);
+    darr->length -= 1;
+    return valuePtr;
+}
+
+inline static void* darr_pop_safe(DArrayT* darr)
+{
+    void* valuePtr = NULL;
+    if (NULL == darr) {}
+    else if (darr->length > 0) { valuePtr = darr_pop(darr); }
     else { LOG_ERROR("Can not pop from darray with size < 0!\n"); }
     return valuePtr;
 }
