@@ -813,9 +813,9 @@ inline static DArrayT* str_arr_create(void)
     if (NULL == result) { LOG_ERROR("Can not allocate dynamic array!\n"); }
     else
     {
-        result->length = 0;                    // set length to 0
-        result->capacity = 0;                  // set capacity to 0
-        result->elementSize = sizeof(int8_t**);// set element size to stride
+        result->length = 0;                   // set length to 0
+        result->capacity = 0;                 // set capacity to 0
+        result->elementSize = sizeof(int8_t*);// set element size to stride
         result->data = NULL;
     }
 
@@ -826,7 +826,7 @@ inline static void str_arr_destroy(DArrayT* strArray)
 {
     if (NULL != strArray)
     {
-        for (size_t i = 0; i < darr_length(strArray); i++) { str_destroy((DStringT*) strArray->data[i]); }
+        for (size_t i = 0; i < darr_length(strArray); i++) { str_destroy(*((DStringT**) darr_get_ptr(strArray, i))); }
         if (strArray->data) { CFREE(strArray->data, strArray->length); }
         CFREE((void*) strArray, DARRAY_HEADER_SIZE + sizeof(int8_t*));
     }
