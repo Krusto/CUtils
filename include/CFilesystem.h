@@ -270,7 +270,7 @@ inline static FileOpResultT file_write_string(const int8_t* filename, const int8
 
         // Write the buffer to the file
 
-        size_t written_size = fprintf(fileOut, (const char*) buffer);
+        size_t written_size = fprintf(fileOut, "%s", (const char*) buffer);
 
         if (written_size == 0)
         {
