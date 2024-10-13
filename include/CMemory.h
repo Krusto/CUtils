@@ -56,12 +56,12 @@ Macro Definitions
  * management functions with your own implementation.
  */
 #ifndef NO_STD_MALLOC
-#define CMEMCPY(dest, p, size) memcpy(dest, p, size)
+#define CMEMCPY(dest, p, size) memcpy((void*) (dest), (void*) (p), size)
 #define CMALLOC(size) malloc(size)
 #define CCALLOC(num, size) calloc(num, size)
-#define CREALLOC(p, new_size) realloc(p, new_size)
-#define CFREE(p, size) free(p)
-#define CMEMSET(p, value, size) memset(p, value, size)
+#define CREALLOC(p, new_size) realloc((void*) (p), new_size)
+#define CFREE(p, size) free((void*) (p))
+#define CMEMSET(p, value, size) memset((void*) (p), value, size)
 #else
 #define CMEMCPY(dest, p, size)
 #define CMALLOC(size)
