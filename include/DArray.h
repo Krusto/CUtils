@@ -886,7 +886,7 @@ inline static void darr_push_generic(DArrayT* darr, void* value)
     CMEMCPY(&darr->data[darr->length * darr->elementSize - darr->elementSize], value, darr->elementSize);
 }
 
-inline static void darr_push_generic_ptr(DArrayT* darr, void* value)
+inline static void darr_push_ptr(DArrayT* darr, void* value)
 {
     darr_resize(darr, darr->length + 1);
     CMEMCPY(&darr->data[darr->length * darr->elementSize - darr->elementSize], &value, darr->elementSize);
