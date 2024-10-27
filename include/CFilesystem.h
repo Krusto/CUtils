@@ -116,7 +116,7 @@ inline static FileOpResultT file_read_binary(const int8_t* filename, size_t* fil
 {
     FileOpResultT result = FILE_READ_SUCCESFULLY;
     // start processing
-    FILE* fileIn = fopen(filename, "rb");// open input file (binary)
+    FILE* fileIn = fopen((const char*) filename, "rb");// open input file (binary)
 
     if (fileIn == NULL)
     {
@@ -133,7 +133,7 @@ inline static FileOpResultT file_read_binary(const int8_t* filename, size_t* fil
         LOG_INFO("Filesize %ld bytes.\n", *filesize);
 
         // allocate memory to contain the whole file.
-        *buffer = (uint8_t*) CMALLOC(*filesize);
+        *buffer = (int8_t*) CMALLOC(*filesize);
         if (buffer == NULL)
         {
             LOG_ERROR("Malloc for input file buffer failed(not enough memory?)\n");
@@ -162,7 +162,7 @@ inline static FileOpResultT file_read_string(const int8_t* filename, size_t* fil
     FileOpResultT result = FILE_READ_SUCCESFULLY;
 
     // Open the input file in text mode
-    FILE* fileIn = fopen(filename, "r");// "r" for reading ASCII files
+    FILE* fileIn = fopen((const char*) filename, "r");// "r" for reading ASCII files
 
     if (fileIn == NULL)
     {
@@ -180,7 +180,7 @@ inline static FileOpResultT file_read_string(const int8_t* filename, size_t* fil
         LOG_INFO("Filesize %ld bytes.\n", *filesize);
 
         // Allocate memory for the file content
-        *buffer = (uint8_t*) CMALLOC(*filesize + 1);// Extra byte for null-terminator for text
+        *buffer = (int8_t*) CMALLOC(*filesize + 1);// Extra byte for null-terminator for text
         if (*buffer == NULL)
         {
             LOG_ERROR("Memory allocation for input file buffer failed (not enough memory?)\n");
@@ -204,7 +204,7 @@ FileOpResultT file_read_utf8(const int8_t* filename, size_t* filesize, int8_t** 
 
     FileOpResultT result = FILE_READ_SUCCESFULLY;
     // start processing
-    FILE* fileIn = fopen(filename, "rb");// open input file (binary)
+    FILE* fileIn = fopen((const char*) filename, "rb");// open input file (binary)
 
     if (fileIn == NULL)
     {
@@ -221,7 +221,7 @@ FileOpResultT file_read_utf8(const int8_t* filename, size_t* filesize, int8_t** 
         LOG_INFO("Filesize %ld bytes.\n", *filesize);
 
         // allocate memory to contain the whole file.
-        *buffer = (uint8_t*) CMALLOC(*filesize + 1);
+        *buffer = (int8_t*) CMALLOC(*filesize + 1);
         if (buffer == NULL)
         {
             LOG_ERROR("Malloc for input file buffer failed(not enough memory?)\n");
@@ -257,7 +257,7 @@ inline static FileOpResultT file_write_string(const int8_t* filename, const int8
     FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
     // Open the output file in write mode ("w" for ASCII text files)
-    FILE* fileOut = fopen(filename, "w");
+    FILE* fileOut = fopen((const char*) filename, "w");
 
     if (fileOut == NULL)
     {
@@ -290,7 +290,7 @@ inline static FileOpResultT file_write_binary(const int8_t* filename, const int8
     FileOpResultT result = FILE_WROTE_SUCCESFULLY;
 
     // Open the output file in binary write mode ("wb" for binary files)
-    FILE* fileOut = fopen(filename, "wb");
+    FILE* fileOut = fopen((const char*) filename, "wb");
 
     if (fileOut == NULL)
     {
@@ -326,7 +326,7 @@ inline static void free_folder_contents_struct(FolderContentsT* contents)
 
 inline static BOOL file_exists(const int8_t* path)
 {
-    FILE* filePtr = fopen(path, "r");
+    FILE* filePtr = fopen((const char*) path, "r");
     BOOL result = FALSE;
     if (NULL != filePtr)
     {
@@ -344,7 +344,7 @@ inline static FileOpResultT get_file_info(const int8_t* path, FileInfoT* fileInf
     {
         result = FILE_OPERATION_SUCCESS;
         WIN32_FILE_ATTRIBUTE_DATA fInfo;
-        GetFileAttributesEx(path, GetFileExInfoStandard, &fInfo);
+        GetFileAttributesEx((const char*) path, GetFileExInfoStandard, &fInfo);
         fileInfoPtr->path.data = path;
         fileInfoPtr->path.length = cstr_length(path);
         fileInfoPtr->fileAttributes = fInfo.dwFileAttributes;
@@ -425,9 +425,9 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
     int8_t sPath[MAX_PATH_SIZE];
 
     //Specify a file mask. *.*
-    sprintf(sPath, "%s\\*.*", dir);
+    sprintf((char*) sPath, "%s\\*.*", dir);
 
-    if ((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
+    if ((hFind = FindFirstFile((char*) sPath, &fdFile)) == INVALID_HANDLE_VALUE)
     {
         LOG_ERROR("Path not found: [%s]\n", dir);
         return FALSE;
@@ -440,16 +440,16 @@ inline static BOOL list_directory_contents(const int8_t* dir, FolderContentsT* c
 
         if ((FALSE == skip) && (fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
         {
-            sprintf(sPath, "%s\\%s", dir, fdFile.cFileName);
+            sprintf((char*) sPath, "%s\\%s", dir, fdFile.cFileName);
 
-            DStringT* str = str_create(&sPath[0], strlen(sPath));
+            DStringT* str = str_create(&sPath[0], strlen((const char*) sPath));
             str_arr_push_back(contents->directories, str);
         }
         else if ((FALSE == skip))
         {
-            sprintf(sPath, "%s\\%s", dir, fdFile.cFileName);
+            sprintf((char*) sPath, "%s\\%s", dir, fdFile.cFileName);
 
-            DStringT* str = str_create(&sPath[0], strlen(sPath));
+            DStringT* str = str_create(&sPath[0], strlen((const char*) sPath));
             str_arr_push_back(contents->files, str);
         }
 

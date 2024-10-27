@@ -48,11 +48,11 @@ Platform specific std type definitions
 #ifdef TRUE
 #undef TRUE
 #endif
-#define TRUE 1u == 1u
+#define TRUE (1u == 1u)
 #ifdef FALSE
 #undef FALSE
 #endif
-#define FALSE 1u == 0u
+#define FALSE (1u == 0u)
 
 #ifndef USE_SPECIFIC_STD_TYPES
 #include <stdint.h>
